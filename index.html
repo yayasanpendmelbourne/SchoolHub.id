@@ -3,41 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Portal SMS Sekolah</title>
+    <title>Dashboard - School Management System</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1>E-Portal SMS Sekolah</h1>
-            <p>Layanan Informasi & Notifikasi Orang Tua Siswa</p>
-        </div>
-    </header>
+    <div class="wrapper">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <h2>EduCore SMS</h2>
+            <nav>
+                <ul>
+                    <li><a href="#" class="active">Dashboard</a></li>
+                    <li><a href="#">Data Siswa</a></li>
+                    <li><a href="#">Data Guru</a></li>
+                    <li><a href="#">Jadwal Pelajaran</a></li>
+                    <li><a href="#">Nilai & Rapor</a></li>
+                    <li><a href="#">Pengaturan</a></li>
+                </ul>
+            </nav>
+        </aside>
 
-    <main class="container">
-        <section class="card">
-            <h2>Kirim Notifikasi SMS</h2>
-            <form id="smsForm">
-                <div class="form-group">
-                    <label for="phone">Nomor HP Orang Tua:</label>
-                    <input type="tel" id="phone" placeholder="Contoh: 081234567890" required>
+        <!-- Main Content Area -->
+        <main class="content">
+            <header>
+                <h1>Dashboard Management Sekolah</h1>
+                <p>Selamat datang di E-Portal Sistem Informasi Sekolah</p>
+            </header>
+
+            <!-- Ringkasan Stat Card -->
+            <section class="stats-grid">
+                <div class="card">
+                    <h3>Total Siswa</h3>
+                    <p class="stat-number" id="totalSiswa">1.250</p>
                 </div>
-                
-                <div class="form-group">
-                    <label for="message">Pesan Notifikasi:</label>
-                    <textarea id="message" rows="4" placeholder="Tulis pesan pengumuman/absensi..." required></textarea>
+                <div class="card">
+                    <h3>Total Guru</h3>
+                    <p class="stat-number">78</p>
                 </div>
+                <div class="card">
+                    <h3>Kelas Aktif</h3>
+                    <p class="stat-number">36</p>
+                </div>
+            </section>
 
-                <button type="submit" class="btn">Kirim SMS</button>
-            </form>
-            <div id="statusMessage" class="status"></div>
-        </section>
-    </main>
-
-    <footer>
-        <p>&copy; 2026 E-Portal SMS Sekolah. All rights reserved.</p>
-    </footer>
-
+            <!-- Tabel Data Ringkas -->
+            <section class="table-section">
+                <h2>Aktivitas Terbaru</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>NIS</th>
+                            <th>Nama Siswa</th>
+                            <th>Kelas</th>
+                            <th>Status Absensi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTable">
+                        <tr>
+                            <td>1001</td>
+                            <td>Ahmad Fauzi</td>
+                            <td>X IPA 1</td>
+                            <td><span class="badge hadir">Hadir</span></td>
+                        </tr>
+                        <tr>
+                            <td>1002</td>
+                            <td>Siti Nurhaliza</td>
+                            <td>XI IPS 2</td>
+                            <td><span class="badge izin">Izin</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
