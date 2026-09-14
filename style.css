@@ -27,7 +27,7 @@ body {
 
 .hidden { display: none !important; }
 
-/* Animasi Mewah */
+/* Animasi */
 .fade-in-up { animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1); }
 .slide-up { animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
 .shake { animation: shake 0.4s ease-in-out; }
@@ -96,7 +96,7 @@ body {
 /* Main Layout */
 .wrapper { display: flex; min-height: 100vh; background: var(--bg-content); }
 
-/* Sidebar Pure Modern */
+/* Sidebar */
 .sidebar {
     width: 270px; background: var(--sidebar-bg); color: white;
     padding: 1.8rem 1.2rem; display: flex; flex-direction: column;
@@ -151,15 +151,19 @@ th, td { padding: 14px 18px; text-align: left; font-size: 0.88rem; border-bottom
 th { color: var(--text-muted); font-weight: 700; background: #f8fafc; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; }
 tr:hover td { background: #f8fafc; }
 
-/* Badges */
+/* Badges & Select Absensi */
 .badge-status { padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
 .badge-status.tervalidasi, .badge-status.aktif { background: #dcfce7; color: #15803d; }
 .badge-status.menunggu { background: #fef9c3; color: #a16207; }
+
+.select-absensi { padding: 6px 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-weight: 600; font-size: 0.85rem; }
 
 /* Buttons & Glow */
 .btn { border: none; padding: 11px 22px; border-radius: 10px; font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: all 0.25s ease; }
 .btn-primary { background: var(--primary); color: white; }
 .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+.btn-danger { background: #ef4444; color: white; padding: 6px 12px; font-size: 0.78rem; border-radius: 6px; }
+.btn-danger:hover { background: #dc2626; }
 .btn-glow { box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35); }
 .btn-glow:hover { box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5); }
 .btn-secondary { background: #e2e8f0; color: #475569; }
