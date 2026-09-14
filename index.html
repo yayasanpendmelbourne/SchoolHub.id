@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Portal SMS Sekolah</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>E-Portal SMS Sekolah</h1>
+            <p>Layanan Informasi & Notifikasi Orang Tua Siswa</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="card">
+            <h2>Kirim Notifikasi SMS</h2>
+            <form id="smsForm">
+                <div class="form-group">
+                    <label for="phone">Nomor HP Orang Tua:</label>
+                    <input type="tel" id="phone" placeholder="Contoh: 081234567890" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Pesan Notifikasi:</label>
+                    <textarea id="message" rows="4" placeholder="Tulis pesan pengumuman/absensi..." required></textarea>
+                </div>
+
+                <button type="submit" class="btn">Kirim SMS</button>
+            </form>
+            <div id="statusMessage" class="status"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 E-Portal SMS Sekolah. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
