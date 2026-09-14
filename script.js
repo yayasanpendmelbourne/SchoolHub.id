@@ -53,12 +53,11 @@ function saveDataToStorage() {
     localStorage.setItem('educore_absensi', JSON.stringify(absensiRecords));
 }
 
-// Event Listener Utama saat Halaman Selesai Dimuat
+// Event Listener Utama
 document.addEventListener("DOMContentLoaded", () => {
     const dateInput = document.getElementById('filterTanggalAbsensi');
     if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
 
-    // Binding Form Login secara Aman
     const loginForm = document.getElementById('formLogin');
     if (loginForm) {
         loginForm.addEventListener('submit', handleLogin);
@@ -93,14 +92,12 @@ function handleLogin(e) {
     if (userObj && userObj.pass === pInput && userObj.role === rInput) {
         currentUser = { username: uInput, ...userObj };
 
-        // Pindah Tampilan ke Portal Utama
         const loginPage = document.getElementById('loginPage');
         const mainApp = document.getElementById('mainApp');
 
         if (loginPage) loginPage.classList.add('hidden');
         if (mainApp) mainApp.classList.remove('hidden');
 
-        // Render Profil Pengguna
         const userNameDisplay = document.getElementById('userNameDisplay');
         const userRoleBadge = document.getElementById('userRoleBadge');
         const userAvatar = document.getElementById('userAvatar');
@@ -147,7 +144,10 @@ function switchTab(tabName, event) {
 
     const sectionEl = document.getElementById(`section-${tabName}`);
     if (sectionEl) sectionEl.classList.remove('hidden');
-    if (event && event.target) event.target.classList.add('active');
+    
+    if (event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+    }
 
     if (tabName === 'manajemen-hr') renderEmployees();
     if (tabName === 'absensi') renderAbsensi();
@@ -233,7 +233,7 @@ async function fetchGoogleSheetAttendance() {
     }
 }
 
-// --- KATA SAMBUTAN & JAM REALTIME ---
+// --- JAM REALTIME & UCAPAN ---
 function startRealtimeClock() {
     if (clockInterval) clearInterval(clockInterval);
 
@@ -678,6 +678,48 @@ function updateAbsensi(date, nis, status) {
     absensiRecords[date][nis] = status;
     saveDataToStorage();
     showToast('Absensi diperbarui.');
+}
+
+function downloadAbsensiPDF() {
+    const { jsPDF } = window.jspdf;
+    const selectedDate = document.getElementById('filterTanggalAbsensi').value;
+    
+    document.getElementById('pdfTanggal').innerText = selectedDate;
+    document.getElementById('pdfGuru').innerText = currentUser ? currentUser.name : 'Guru';
+    document.getElementById('pdfNamaGuruSign').innerText = currentUser ? currentUser.name : 'Guru Pengampu';
+
+    const pdfTbody = document.getElementById('pdfTbodyAbsensi');
+    pdfTbody.innerHTML = '';
+
+    let filteredSiswa = dataSiswa;
+    if (currentUser.role === 'guru_tk') filteredSiswa = dataSiswa.filter(s => s.tingkat === 'TK');
+    if (currentUser.role === 'guru_sd') filteredSiswa = dataSiswa.filter(s => s.tingkat === 'SD');
+
+    filteredSiswa.forEach((s, index) => {
+        const status = (absensiRecords[selectedDate] && absensiRecords[selectedDate][s.nis]) || 'Hadir';
+        pdfTbody.innerHTML += `
+            <tr>
+                <td style="text-align:center;">${index + 1}</td>
+                <td>${s.nis}</td>
+                <td>${s.nama}</td>
+                <td>${s.kelas}</td>
+                <td>${status}</td>
+            </tr>
+        `;
+    });
+
+    const element = document.getElementById('pdfExportContainer');
+    html2canvas(element, { scale: 2 }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`Laporan_Absensi_${selectedDate}.pdf`);
+        showToast('PDF Absensi Berhasil Diunduh!');
+    });
 }
 
 function renderUsers() {
