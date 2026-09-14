@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - School Management System</title>
+    <title>EduCore - School Management System</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -13,69 +13,255 @@
             <h2>EduCore SMS</h2>
             <nav>
                 <ul>
-                    <li><a href="#" class="active">Dashboard</a></li>
-                    <li><a href="#">Data Siswa</a></li>
-                    <li><a href="#">Data Guru</a></li>
-                    <li><a href="#">Jadwal Pelajaran</a></li>
-                    <li><a href="#">Nilai & Rapor</a></li>
-                    <li><a href="#">Pengaturan</a></li>
+                    <li><a href="#" class="nav-link active" onclick="switchTab('dashboard')">Dashboard</a></li>
+                    <li><a href="#" class="nav-link" onclick="switchTab('siswa')">Data Siswa</a></li>
+                    <li><a href="#" class="nav-link" onclick="switchTab('guru')">Guru & Staff</a></li>
+                    <li><a href="#" class="nav-link" onclick="switchTab('jadwal')">Jadwal Pelajaran</a></li>
                 </ul>
             </nav>
         </aside>
 
         <!-- Main Content Area -->
         <main class="content">
-            <header>
-                <h1>Dashboard Management Sekolah</h1>
-                <p>Selamat datang di E-Portal Sistem Informasi Sekolah</p>
-            </header>
+            
+            <!-- SECTION 1: DASHBOARD -->
+            <div id="section-dashboard" class="tab-content">
+                <header>
+                    <h1>Dashboard Management Sekolah</h1>
+                    <p>Ringkasan statistik data sekolah real-time.</p>
+                </header>
 
-            <!-- Ringkasan Stat Card -->
-            <section class="stats-grid">
-                <div class="card">
-                    <h3>Total Siswa</h3>
-                    <p class="stat-number" id="totalSiswa">1.250</p>
-                </div>
-                <div class="card">
-                    <h3>Total Guru</h3>
-                    <p class="stat-number">78</p>
-                </div>
-                <div class="card">
-                    <h3>Kelas Aktif</h3>
-                    <p class="stat-number">36</p>
-                </div>
-            </section>
+                <section class="stats-grid">
+                    <div class="card border-blue">
+                        <h3>Siswa TK</h3>
+                        <p class="stat-number" id="statSiswaTK">120</p>
+                    </div>
+                    <div class="card border-green">
+                        <h3>Siswa SD</h3>
+                        <p class="stat-number" id="statSiswaSD">450</p>
+                    </div>
+                    <div class="card border-purple">
+                        <h3>Total Guru & Staff</h3>
+                        <p class="stat-number" id="statGuru">42</p>
+                    </div>
+                    <div class="card border-orange">
+                        <h3>Statistik Kelas</h3>
+                        <p class="stat-number" id="statKelas">18 Kelas</p>
+                    </div>
+                </section>
+            </div>
 
-            <!-- Tabel Data Ringkas -->
-            <section class="table-section">
-                <h2>Aktivitas Terbaru</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>NIS</th>
-                            <th>Nama Siswa</th>
-                            <th>Kelas</th>
-                            <th>Status Absensi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="studentTable">
-                        <tr>
-                            <td>1001</td>
-                            <td>Ahmad Fauzi</td>
-                            <td>X IPA 1</td>
-                            <td><span class="badge hadir">Hadir</span></td>
-                        </tr>
-                        <tr>
-                            <td>1002</td>
-                            <td>Siti Nurhaliza</td>
-                            <td>XI IPS 2</td>
-                            <td><span class="badge izin">Izin</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </section>
+            <!-- SECTION 2: DATA SISWA -->
+            <div id="section-siswa" class="tab-content hidden">
+                <header class="section-header">
+                    <div>
+                        <h1>Data Siswa (TK / SD)</h1>
+                        <p>Kelola biodata, foto, dokumen, dan status siswa.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModalSiswa()">+ Tambah Siswa Baru</button>
+                </header>
+
+                <section class="table-section">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Foto</th>
+                                <th>NIS / NISN</th>
+                                <th>Nama Lengkap</th>
+                                <th>Tingkat/Kelas</th>
+                                <th>Orang Tua / Wali</th>
+                                <th>No. HP</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodySiswa">
+                            <!-- Injected by JavaScript -->
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+
+            <!-- SECTION 3: GURU & STAFF -->
+            <div id="section-guru" class="tab-content hidden">
+                <header class="section-header">
+                    <div>
+                        <h1>Data Guru & Staff</h1>
+                        <p>Kelola biodata guru, jabatan, kelas yang diampu, dan mata pelajaran.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModalGuru()">+ Tambah Guru Baru</button>
+                </header>
+
+                <section class="table-section">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Foto</th>
+                                <th>NIP / ID</th>
+                                <th>Nama Guru</th>
+                                <th>Jabatan</th>
+                                <th>Mata Pelajaran</th>
+                                <th>Kelas Diampu</th>
+                                <th>No. HP</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyGuru">
+                            <!-- Injected by JavaScript -->
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+
+            <!-- SECTION 4: JADWAL PELAJARAN -->
+            <div id="section-jadwal" class="tab-content hidden">
+                <header>
+                    <h1>Jadwal Pelajaran</h1>
+                    <p>Penjadwalan aktivitas belajar mengajar harian.</p>
+                </header>
+
+                <section class="table-section">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Hari</th>
+                                <th>Waktu</th>
+                                <th>Kelas</th>
+                                <th>Mata Pelajaran</th>
+                                <th>Guru Pengampu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Senin</td>
+                                <td>08:00 - 09:30</td>
+                                <td>SD - Kelas 1A</td>
+                                <td>Matematika Dasar</td>
+                                <td>Budi Santoso, S.Pd.</td>
+                            </tr>
+                            <tr>
+                                <td>Senin</td>
+                                <td>08:00 - 09:00</td>
+                                <td>TK - Kelas B1</td>
+                                <td>Mewarnai & Seni</td>
+                                <td>Siti Rahma, S.Pd.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+
         </main>
     </div>
+
+    <!-- MODAL FORM: TAMBAH SISWA -->
+    <div id="modalSiswa" class="modal hidden">
+        <div class="modal-content">
+            <h2>Tambah Data Siswa Baru</h2>
+            <form id="formSiswa" onsubmit="saveSiswa(event)">
+                <div class="form-group-grid">
+                    <div>
+                        <label>NIS / NISN:</label>
+                        <input type="text" id="siswaNis" required>
+                    </div>
+                    <div>
+                        <label>Nama Lengkap:</label>
+                        <input type="text" id="siswaNama" required>
+                    </div>
+                    <div>
+                        <label>Tingkat & Kelas:</label>
+                        <select id="siswaKelas" required>
+                            <option value="TK - Kelompok A">TK - Kelompok A</option>
+                            <option value="TK - Kelompok B">TK - Kelompok B</option>
+                            <option value="SD - Kelas 1">SD - Kelas 1</option>
+                            <option value="SD - Kelas 2">SD - Kelas 2</option>
+                            <option value="SD - Kelas 3">SD - Kelas 3</option>
+                            <option value="SD - Kelas 4">SD - Kelas 4</option>
+                            <option value="SD - Kelas 5">SD - Kelas 5</option>
+                            <option value="SD - Kelas 6">SD - Kelas 6</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Nama Orang Tua / Wali:</label>
+                        <input type="text" id="siswaOrtu" required>
+                    </div>
+                    <div>
+                        <label>Nomor HP Orang Tua:</label>
+                        <input type="tel" id="siswaHp" required>
+                    </div>
+                    <div>
+                        <label>Status Siswa:</label>
+                        <select id="siswaStatus">
+                            <option value="Aktif">Aktif</option>
+                            <option value="Cuti">Cuti</option>
+                            <option value="Lulus">Lulus</option>
+                            <option value="Pindah">Pindah</option>
+                        </select>
+                    </div>
+                    <div class="full-width">
+                        <label>Alamat Rumah:</label>
+                        <textarea id="siswaAlamat" rows="2" required></textarea>
+                    </div>
+                    <div>
+                        <label>URL Foto Siswa (Opsional):</label>
+                        <input type="url" id="siswaFoto" placeholder="https://..." value="https://via.placeholder.com/40">
+                    </div>
+                    <div>
+                        <label>Dokumen Siswa (Akta/KK - Link):</label>
+                        <input type="text" id="siswaDokumen" placeholder="Nama File / Link Dokumen">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModalSiswa()">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Data Siswa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL FORM: TAMBAH GURU -->
+    <div id="modalGuru" class="modal hidden">
+        <div class="modal-content">
+            <h2>Tambah Data Guru / Staff</h2>
+            <form id="formGuru" onsubmit="saveGuru(event)">
+                <div class="form-group-grid">
+                    <div>
+                        <label>NIP / ID Guru:</label>
+                        <input type="text" id="guruNip" required>
+                    </div>
+                    <div>
+                        <label>Nama Lengkap & Gelar:</label>
+                        <input type="text" id="guruNama" required>
+                    </div>
+                    <div>
+                        <label>Jabatan:</label>
+                        <input type="text" id="guruJabatan" placeholder="Wali Kelas / Guru Pengampu" required>
+                    </div>
+                    <div>
+                        <label>Mata Pelajaran:</label>
+                        <input type="text" id="guruMapel" placeholder="Matematika / Seni / Tematik" required>
+                    </div>
+                    <div>
+                        <label>Kelas yang Diampu:</label>
+                        <input type="text" id="guruKelas" placeholder="SD Kelas 1A, TK B1" required>
+                    </div>
+                    <div>
+                        <label>Nomor HP:</label>
+                        <input type="tel" id="guruHp" required>
+                    </div>
+                    <div>
+                        <label>URL Foto Guru (Opsional):</label>
+                        <input type="url" id="guruFoto" placeholder="https://..." value="https://via.placeholder.com/40">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModalGuru()">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Data Guru</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
