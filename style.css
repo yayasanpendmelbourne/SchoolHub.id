@@ -23,7 +23,30 @@ body { background-color: var(--bg-main); color: var(--text-dark); }
 .card { background: white; border-radius: var(--radius); border: 1px solid #e2e8f0; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
 .p-4 { padding: 20px; }
 .mt-2 { margin-top: 10px; }
+.mb-2 { margin-bottom: 10px; }
 .mt-4 { margin-top: 20px; }
+
+/* TOP NAV BAR & NOTIFICATION CENTER */
+.top-nav-bar { display: flex; justify-content: flex-end; margin-bottom: 15px; }
+.notif-dropdown-wrapper { position: relative; }
+.btn-notif { background: white; border: 1px solid #cbd5e1; border-radius: 50%; width: 42px; height: 42px; font-size: 1.2rem; cursor: pointer; position: relative; }
+.notif-badge { position: absolute; top: -4px; right: -4px; background: #ef4444; color: white; border-radius: 50%; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; }
+.notif-card { position: absolute; right: 0; top: 50px; width: 320px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: 1px solid #e2e8f0; z-index: 100; overflow: hidden; }
+.notif-header { background: #f8fafc; padding: 12px 16px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+.notif-body { max-height: 280px; overflow-y: auto; }
+.notif-item { padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 0.82rem; }
+.notif-item:last-child { border-bottom: none; }
+.notif-item small { display: block; color: var(--text-muted); margin-top: 4px; }
+
+/* SEARCH BAR IN TABLES */
+.header-action-group { display: flex; gap: 12px; align-items: center; }
+.input-search { padding: 10px 14px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.85rem; width: 220px; }
+
+/* CLICKABLE STUDENT NAME & PROFILE MODAL */
+.student-link { color: #2563eb; font-weight: 700; text-decoration: none; cursor: pointer; }
+.student-link:hover { text-decoration: underline; }
+.student-profile-header { display: flex; align-items: center; gap: 15px; }
+.profile-avatar-lg { width: 64px; height: 64px; border-radius: 50%; border: 2px solid #2563eb; }
 
 .days-row { display: flex; justify-content: space-between; margin-top: 15px; text-align: center; }
 .days-row div { padding: 8px 6px; border-radius: 8px; font-size: 0.8rem; }
