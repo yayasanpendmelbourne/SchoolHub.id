@@ -29,6 +29,7 @@ let dataMapel = JSON.parse(localStorage.getItem('educore_mapel')) || defaultMape
 let dataNilai = JSON.parse(localStorage.getItem('educore_nilai')) || defaultNilai;
 let absensiRecords = JSON.parse(localStorage.getItem('educore_absensi')) || {};
 let currentUser = null;
+let attendanceChartInstance = null;
 
 function saveDataToStorage() {
     localStorage.setItem('educore_users', JSON.stringify(usersList));
@@ -68,6 +69,7 @@ function handleLogin(e) {
         document.getElementById('userAvatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.avatar}`;
 
         applyRolePermissions(currentUser.role);
+        renderNotifications();
         renderAllData();
         showToast(`Selamat datang, ${currentUser.name}!`);
     } else {
@@ -104,31 +106,128 @@ function switchTab(tabName, event) {
     if (tabName === 'dashboard') renderDashboardAcademic();
 }
 
+/* FITUR: NOTIFICATION CENTER */
+function toggleNotifDropdown() {
+    document.getElementById('notifDropdown').classList.toggle('hidden');
+}
+
+function renderNotifications() {
+    if (!currentUser) return;
+    const notifList = document.getElementById('notifList');
+    const notifCount = document.getElementById('notifCount');
+    const notifRoleTag = document.getElementById('notifRoleTag');
+
+    notifRoleTag.innerText = currentUser.role.toUpperCase();
+    notifList.innerHTML = '';
+
+    let items = [];
+    if (currentUser.role === 'admin') {
+        items = [
+            { text: 'Sistem EduCore diperbarui ke versi v2.4.', time: 'Baru saja' },
+            { text: `Total pengguna aktif sistem: ${Object.keys(usersList).length} Akun.`, time: '10 menit lalu' },
+            { text: 'Laporan backup basis data bulanan siap.', time: '1 jam lalu' }
+        ];
+    } else if (currentUser.role === 'guru_tk') {
+        items = [
+            { text: 'Pengingat: Input nilai perkembangan motorik TK minggu ini.', time: '30 menit lalu' },
+            { text: '2 Murid TK memerlukan rekap absensi bulanan.', time: '2 jam lalu' }
+        ];
+    } else if (currentUser.role === 'guru_sd') {
+        items = [
+            { text: 'Jadwal Ulangan Harian Matematika SD telah dibuka.', time: '15 menit lalu' },
+            { text: 'Harap periksa kelengkapan nilai siswa SD Kelas 1.', time: '3 jam lalu' }
+        ];
+    }
+
+    notifCount.innerText = items.length;
+    items.forEach(item => {
+        notifList.innerHTML += `
+            <div class="notif-item">
+                <div>${item.text}</div>
+                <small>${item.time}</small>
+            </div>
+        `;
+    });
+}
+
 function renderAllData() {
+    renderSiswaTables(dataSiswa);
+    renderUsers();
+    renderPembelajaran();
+    renderDashboardAcademic();
+}
+
+/* FITUR: SEARCH MURID IN TABLES */
+function filterSiswaTable(tingkat, query) {
+    const q = query.toLowerCase();
+    const filtered = dataSiswa.filter(s => 
+        s.tingkat === tingkat && (s.nama.toLowerCase().includes(q) || s.nis.toLowerCase().includes(q))
+    );
+    renderSiswaTables(filtered, tingkat);
+}
+
+function renderSiswaTables(listSiswa, specificTingkat = null) {
     const tbodyTK = document.getElementById('tbodySiswaTK');
     const tbodySD = document.getElementById('tbodySiswaSD');
-    tbodyTK.innerHTML = ''; tbodySD.innerHTML = '';
 
-    dataSiswa.forEach(s => {
+    if (!specificTingkat || specificTingkat === 'TK') tbodyTK.innerHTML = '';
+    if (!specificTingkat || specificTingkat === 'SD') tbodySD.innerHTML = '';
+
+    listSiswa.forEach(s => {
         const row = `<tr>
             <td>${s.nis}</td>
-            <td><strong>${s.nama}</strong></td>
+            <td><a class="student-link" onclick="openModalStudentProfile('${s.nis}')">👤 ${s.nama}</a></td>
             <td>${s.kelas}</td>
             <td>${s.ortu}</td>
             <td>${s.hp}</td>
             <td><button class="btn btn-danger" onclick="deleteSiswa('${s.nis}')">Hapus</button></td>
         </tr>`;
 
-        if (s.tingkat === 'TK') tbodyTK.innerHTML += row;
-        else tbodySD.innerHTML += row;
+        if (s.tingkat === 'TK' && (!specificTingkat || specificTingkat === 'TK')) tbodyTK.innerHTML += row;
+        if (s.tingkat === 'SD' && (!specificTingkat || specificTingkat === 'SD')) tbodySD.innerHTML += row;
     });
-
-    renderUsers();
-    renderPembelajaran();
-    renderDashboardAcademic();
 }
 
-// DASHBOARD AKADEMIK DINAMIS LENGKAP
+/* FITUR: STUDENT PROFILE MODAL */
+function openModalStudentProfile(nis) {
+    const s = dataSiswa.find(item => item.nis === nis);
+    if (!s) return;
+
+    document.getElementById('profileNama').innerText = s.nama;
+    document.getElementById('profileNis').innerText = s.nis;
+    document.getElementById('profileTingkatKelas').innerText = `${s.tingkat} - ${s.kelas}`;
+    document.getElementById('profileOrtu').innerText = s.ortu;
+    document.getElementById('profileHp').innerText = s.hp;
+    document.getElementById('profileAvatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${s.nama}`;
+
+    // Load Student Grades History
+    const profileTbody = document.getElementById('profileTbodyNilai');
+    profileTbody.innerHTML = '';
+    const studentGrades = dataNilai.filter(n => n.nis === nis);
+
+    if (studentGrades.length === 0) {
+        profileTbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">Belum ada nilai terrekam.</td></tr>`;
+    } else {
+        studentGrades.forEach(n => {
+            const mObj = dataMapel.find(m => m.kode === n.mapelKode);
+            profileTbody.innerHTML += `
+                <tr>
+                    <td>${mObj ? mObj.nama : n.mapelKode}</td>
+                    <td><b>${n.nilai}</b></td>
+                    <td><small>${n.catatan}</small></td>
+                </tr>
+            `;
+        });
+    }
+
+    document.getElementById('modalStudentProfile').classList.remove('hidden');
+}
+
+function closeModalStudentProfile() {
+    document.getElementById('modalStudentProfile').classList.add('hidden');
+}
+
+/* DASHBOARD AKADEMIK & ATTENDANCE TREND CHART */
 function renderDashboardAcademic() {
     if (!currentUser) return;
 
@@ -140,6 +239,15 @@ function renderDashboardAcademic() {
 
     document.getElementById('dashTotalMapel').innerText = filteredMapel.length;
     document.getElementById('dashTotalNilai').innerText = filteredNilai.length;
+
+    // Show/Hide Attendance Trend Chart based on Role
+    const trendCard = document.getElementById('attendanceTrendCard');
+    if (role === 'admin') {
+        trendCard.classList.add('hidden');
+    } else {
+        trendCard.classList.remove('hidden');
+        renderAttendanceChart();
+    }
 
     // List Mapel Dashboard Left
     const mapelListEl = document.getElementById('dashMapelList');
@@ -165,12 +273,44 @@ function renderDashboardAcademic() {
 
         tbodyNilaiDash.innerHTML += `
             <tr>
-                <td><b>${sObj ? sObj.nama : n.nis}</b></td>
+                <td><a class="student-link" onclick="openModalStudentProfile('${n.nis}')">${sObj ? sObj.nama : n.nis}</a></td>
                 <td>${mObj ? mObj.nama : n.mapelKode}</td>
                 <td><span class="badge-role">${n.nilai}</span></td>
                 <td><small>${n.catatan}</small></td>
             </tr>
         `;
+    });
+}
+
+/* FITUR: ATTENDANCE TREND CHART (CHART.JS) */
+function renderAttendanceChart() {
+    const ctx = document.getElementById('attendanceChart').getContext('2d');
+    
+    if (attendanceChartInstance) {
+        attendanceChartInstance.destroy();
+    }
+
+    attendanceChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'],
+            datasets: [{
+                label: 'Persentase Kehadiran Murid (%)',
+                data: [95, 98, 92, 97],
+                borderColor: '#2563eb',
+                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                fill: true,
+                tension: 0.3,
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { min: 80, max: 100 }
+            }
+        }
     });
 }
 
@@ -195,7 +335,7 @@ function renderPembelajaran() {
         const mObj = dataMapel.find(m => m.kode === n.mapelKode);
         tbodyNilai.innerHTML += `
             <tr>
-                <td><b>${sObj ? sObj.nama : n.nis}</b></td>
+                <td><a class="student-link" onclick="openModalStudentProfile('${n.nis}')">${sObj ? sObj.nama : n.nis}</a></td>
                 <td>${mObj ? mObj.nama : n.mapelKode}</td>
                 <td><b>${n.nilai}</b></td>
                 <td><button class="btn btn-danger" onclick="deleteNilai('${n.id}')">Hapus</button></td>
@@ -281,7 +421,7 @@ function renderAbsensi() {
         tbody.innerHTML += `
             <tr>
                 <td>${s.nis}</td>
-                <td><strong>${s.nama}</strong></td>
+                <td><a class="student-link" onclick="openModalStudentProfile('${s.nis}')">${s.nama}</a></td>
                 <td><span class="badge-role">${s.tingkat}</span></td>
                 <td>${s.kelas}</td>
                 <td>
