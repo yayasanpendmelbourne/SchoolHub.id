@@ -29,6 +29,9 @@ const defaultNilai = [
     { id: '2', nis: '201', mapelKode: 'SD-MTK', nilai: '90', catatan: 'Sangat paham perkalian dasar', role: 'guru_sd' }
 ];
 
+// URL Publikasi CSV dari Spreadsheet Google Sheets kamu
+const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSmXgX-pub?gid=2102192841&single=true&output=csv';
+
 let usersList = JSON.parse(localStorage.getItem('educore_users')) || defaultUsers;
 let employeesList = JSON.parse(localStorage.getItem('educore_employees')) || defaultEmployees;
 let dataSiswa = JSON.parse(localStorage.getItem('educore_siswa')) || defaultSiswa;
@@ -138,17 +141,101 @@ function applyRolePermissions(role) {
 
 function switchTab(tabName, event) {
     if (event) event.preventDefault();
+
+    // Proteksi keamanan tab khusus admin
+    if (tabName === 'rekap-absensi-gas' && currentUser?.role !== 'admin') {
+        showToast('Akses ditolak. Fitur ini khusus Admin!', 'error');
+        return;
+    }
+
     document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
     document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
 
-    document.getElementById(`section-${tabName}`).classList.remove('hidden');
-    if (event) event.target.classList.add('active');
+    const activeSection = document.getElementById(`section-${tabName}`);
+    if (activeSection) activeSection.classList.remove('hidden');
+
+    if (event && event.target) event.target.classList.add('active');
 
     if (tabName === 'manajemen-hr') renderEmployees();
     if (tabName === 'absensi') renderAbsensi();
     if (tabName === 'manajemen-user') renderUsers();
     if (tabName === 'manajemen-pembelajaran') renderPembelajaran();
     if (tabName === 'dashboard') renderDashboardAcademic();
+    if (tabName === 'rekap-absensi-gas') fetchGoogleSheetAttendance();
+}
+
+/* SINKRONISASI DATA GOOGLE SHEETS (KHUSUS ADMIN) */
+async function fetchGoogleSheetAttendance() {
+    const loadingEl = document.getElementById('loadingSheet');
+    const theadEl = document.getElementById('theadGAS');
+    const tbodyEl = document.getElementById('tbodyGAS');
+
+    if (!theadEl || !tbodyEl) return;
+
+    loadingEl.classList.remove('hidden');
+    tbodyEl.innerHTML = '';
+    theadEl.innerHTML = '';
+
+    try {
+        const response = await fetch(GOOGLE_SHEET_CSV_URL);
+        if (!response.ok) throw new Error("Gagal terhubung ke Google Sheets.");
+
+        const dataText = await response.text();
+        const rows = parseCSV(dataText);
+
+        if (rows.length === 0) {
+            tbodyEl.innerHTML = '<tr><td colspan="10" style="text-align:center;">Data kosong.</td></tr>';
+            loadingEl.classList.add('hidden');
+            return;
+        }
+
+        // 1. Header Tabel
+        const headers = rows[0];
+        let headerHTML = '<tr>';
+        headers.forEach(header => {
+            headerHTML += `<th>${header}</th>`;
+        });
+        headerHTML += '</tr>';
+        theadEl.innerHTML = headerHTML;
+
+        // 2. Baris Data Tabel
+        for (let i = 1; i < rows.length; i++) {
+            const rowData = rows[i];
+            if (rowData.length <= 1 && rowData[0] === '') continue;
+
+            let rowHTML = '<tr>';
+            rowData.forEach(cell => {
+                rowHTML += `<td>${cell}</td>`;
+            });
+            rowHTML += '</tr>';
+            tbodyEl.innerHTML += rowHTML;
+        }
+
+        showToast('Data absensi spreadsheet berhasil dimuat!');
+    } catch (error) {
+        console.error('Gagal mengambil data dari Google Sheets:', error);
+        showToast('Gagal memuat spreadsheet. Pastikan sheet sudah dipublikasikan ke Web.', 'error');
+        tbodyEl.innerHTML = '<tr><td colspan="10" style="text-align:center; color:red;">Gagal memuat data. Silakan klik File > Bagikan > Publikasikan ke Web (.csv) di Spreadsheet Anda.</td></tr>';
+    } finally {
+        loadingEl.classList.add('hidden');
+    }
+}
+
+function parseCSV(text) {
+    const lines = text.split('\n');
+    return lines.map(line => {
+        const regex = /(?:\"([^\"]*)\"|([^,]+)|)/g;
+        const matches = [];
+        let match;
+        while ((match = regex.exec(line)) && match.index < line.length) {
+            if (match[1] !== undefined) {
+                matches.push(match[1]);
+            } else if (match[2] !== undefined) {
+                matches.push(match[2].trim());
+            }
+        }
+        return matches;
+    });
 }
 
 function toggleNotifDropdown() {
@@ -168,7 +255,7 @@ function renderNotifications() {
     if (currentUser.role === 'admin') {
         items = [
             { text: `Modul HR Aktif: ${employeesList.length} karyawan terdaftar.`, time: 'Baru saja' },
-            { text: 'Sistem EduCore v2.5 berjalan lancar.', time: '10 menit lalu' },
+            { text: 'Integrasi Spreadsheet Absensi Aktif.', time: '5 menit lalu' },
             { text: 'Laporan penggajian siap ditinjau.', time: '1 jam lalu' }
         ];
     } else if (currentUser.role === 'guru_tk') {
@@ -268,7 +355,7 @@ function deleteEmployee(nip) {
     }
 }
 
-/* SERCH MURID */
+/* SEARCH MURID */
 function filterSiswaTable(tingkat, query) {
     const q = query.toLowerCase();
     const filtered = dataSiswa.filter(s => 
