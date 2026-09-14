@@ -7,23 +7,44 @@ const VALID_USERS = {
 
 let currentUser = null;
 
-// Database Mock Data
-let dataSiswa = [
+// Mock Data Awal (Default)
+const defaultSiswa = [
     { nis: '101', nama: 'Ahmad Fauzi', tingkat: 'TK', kelas: 'TK B', ortu: 'Budi Fauzi', hp: '08123456781', absensi: 'Hadir' },
     { nis: '102', nama: 'Anisa Putri', tingkat: 'TK', kelas: 'TK A', ortu: 'Hendra', hp: '08123456784', absensi: 'Hadir' },
     { nis: '201', nama: 'Siti Nurhaliza', tingkat: 'SD', kelas: 'SD Kelas 2', ortu: 'Rahmat', hp: '08123456782', absensi: 'Hadir' },
     { nis: '202', nama: 'Doni Pratama', tingkat: 'SD', kelas: 'SD Kelas 5', ortu: 'Eko', hp: '08123456785', absensi: 'Izin' }
 ];
 
-let dataGuru = [
+const defaultGuru = [
     { id: 1, nip: 'G-TK-01', nama: 'Siti Rahma, S.Pd.', tingkat: 'TK', jabatan: 'Guru Kelompok B', mapel: 'Tematik TK', hp: '081987654321' },
     { id: 2, nip: 'G-SD-01', nama: 'Budi Santoso, S.Pd.', tingkat: 'SD', jabatan: 'Guru Wali Kelas 2', mapel: 'Matematika', hp: '081987654322' }
 ];
 
-let dataBukuKerja = [
+const defaultBukuKerja = [
     { id: 1, template: 'RPP / Modul Ajar', mapel: 'Tematik SD Kelas 2', tanggal: '2026-09-10', status: 'Tervalidasi' },
     { id: 2, template: 'Program Tahunan (PROTA)', mapel: 'Seni & Kebudayaan TK B', tanggal: '2026-09-12', status: 'Menunggu' }
 ];
+
+// FUNGSI MEMBACA DATA DARI LOCALSTORAGE
+function loadDataFromStorage() {
+    dataSiswa = JSON.parse(localStorage.getItem('educore_siswa')) || defaultSiswa;
+    dataGuru = JSON.parse(localStorage.getItem('educore_guru')) || defaultGuru;
+    dataBukuKerja = JSON.parse(localStorage.getItem('educore_bukukerja')) || defaultBukuKerja;
+}
+
+// FUNGSI MENYIMPAN DATA KE LOCALSTORAGE
+function saveDataToStorage() {
+    localStorage.setItem('educore_siswa', JSON.stringify(dataSiswa));
+    localStorage.setItem('educore_guru', JSON.stringify(dataGuru));
+    localStorage.setItem('educore_bukukerja', JSON.stringify(dataBukuKerja));
+}
+
+// Inisialisasi Data Variable
+let dataSiswa = [];
+let dataGuru = [];
+let dataBukuKerja = [];
+
+loadDataFromStorage();
 
 // Notification Toast
 function showToast(msg, type = 'success') {
@@ -119,7 +140,19 @@ function renderAllData() {
     tbodyTK.innerHTML = ''; tbodySD.innerHTML = '';
 
     dataSiswa.forEach(s => {
-        const row = `<tr><td>${s.nis}</td><td><strong>${s.nama}</strong></td><td>${s.kelas}</td><td>${s.ortu}</td><td>${s.hp}</td><td><span class="badge-status aktif">Aktif</span></td></tr>`;
+        const deleteBtn = (currentUser && currentUser.role === 'admin')
+            ? `<button class="btn btn-danger" onclick="deleteSiswa('${s.nis}')">🗑️ Hapus</button>`
+            : `-`;
+
+        const row = `<tr>
+            <td>${s.nis}</td>
+            <td><strong>${s.nama}</strong></td>
+            <td>${s.kelas}</td>
+            <td>${s.ortu}</td>
+            <td>${s.hp}</td>
+            <td>${deleteBtn}</td>
+        </tr>`;
+
         if (s.tingkat === 'TK') tbodyTK.innerHTML += row;
         else tbodySD.innerHTML += row;
     });
@@ -156,7 +189,7 @@ function renderGuruTables() {
     });
 }
 
-// Render Absensi Berdasarkan Peran
+// Render Absensi Berdasarkan Peran Login
 function renderAbsensi() {
     const tbody = document.getElementById('tbodyAbsensi');
     const subtitle = document.getElementById('absensiSubtitle');
@@ -174,7 +207,7 @@ function renderAbsensi() {
         subtitle.innerText = "Pencatatan Kehadiran Seluruh Siswa Sekolah.";
     }
 
-    filteredSiswa.forEach((s, idx) => {
+    filteredSiswa.forEach(s => {
         tbody.innerHTML += `
             <tr>
                 <td>${s.nis}</td>
@@ -198,7 +231,18 @@ function updateAbsensi(nis, status) {
     const target = dataSiswa.find(s => s.nis === nis);
     if (target) {
         target.absensi = status;
+        saveDataToStorage();
         showToast(`Absensi ${target.nama} diperbarui: ${status}`);
+    }
+}
+
+// Hapus Siswa (Khusus Admin)
+function deleteSiswa(nis) {
+    if (confirm("Apakah Anda yakin ingin menghapus data murid ini?")) {
+        dataSiswa = dataSiswa.filter(s => s.nis !== nis);
+        saveDataToStorage();
+        renderAllData();
+        showToast("Data Murid berhasil dihapus!", "error");
     }
 }
 
@@ -206,6 +250,7 @@ function updateAbsensi(nis, status) {
 function deleteGuru(id) {
     if (confirm("Apakah Anda yakin ingin menghapus data guru ini?")) {
         dataGuru = dataGuru.filter(g => g.id !== id);
+        saveDataToStorage();
         renderGuruTables();
         document.getElementById('statGuru').innerText = dataGuru.length;
         showToast("Data Guru berhasil dihapus!", "error");
@@ -256,6 +301,7 @@ function saveSiswa(e) {
         hp: document.getElementById('siswaHp').value,
         absensi: 'Hadir'
     });
+    saveDataToStorage();
     renderAllData();
     closeModalSiswa();
     showToast('Data Siswa berhasil ditambahkan!');
@@ -283,6 +329,7 @@ function saveGuru(e) {
         mapel: document.getElementById('guruMapel').value,
         hp: document.getElementById('guruHp').value
     });
+    saveDataToStorage();
     renderAllData();
     closeModalGuru();
     showToast('Data Guru baru berhasil disimpan!');
@@ -304,6 +351,7 @@ function saveBukuKerja(e) {
         tanggal: new Date().toISOString().split('T')[0],
         status: 'Menunggu'
     });
+    saveDataToStorage();
     renderBukuKerja();
     closeModalBukuKerja();
     showToast('Dokumen Buku Kerja berhasil dikirim!');
@@ -311,6 +359,7 @@ function saveBukuKerja(e) {
 
 function validasiDokumen(index) {
     dataBukuKerja[index].status = 'Tervalidasi';
+    saveDataToStorage();
     renderBukuKerja();
     showToast('Dokumen berhasil divalidasi oleh Admin!');
 }
