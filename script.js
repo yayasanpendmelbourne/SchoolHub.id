@@ -29,10 +29,65 @@ const defaultNilai = [
     { id: '2', nis: '201', mapelKode: 'SD-MTK', nilai: '90', catatan: 'Sangat paham perkalian dasar', role: 'guru_sd' }
 ];
 
-// LINK SPREADSHEET TERBARU (Diubah ke format ekspor CSV)
-// Mengubah URL pubhtml menjadi URL publikasi CSV yang tepat
-const ORIGINAL_PUBHTML_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSzTziMYccKpqpum3QRAgsY6fET9UOTVIIohcI5PVphoUGEa_TMIOiLFUaR3SQ_wNWlM10WEQ36XA0V/pubhtml';
-const GOOGLE_SHEET_CSV_URL = ORIGINAL_PUBHTML_URL.replace('/pubhtml', '/pub?output=csv');
+let usersList = JSON.parse(localStorage.getItem('educore_users')) || defaultUsers;
+let employeesList = JSON.parse(localStorage.getItem('educore_employees')) || defaultEmployees;
+let dataSiswa = JSON.parse(localStorage.getItem('educore_siswa')) || defaultSiswa;
+let dataMapel = JSON.parse(localStorage.getItem('educore_mapel')) || defaultMapel;
+let dataNilai = JSON.parse(localStorage.getItem('educore_nilai')) || defaultNilai;
+let absensiRecords = JSON.parse(localStorage.getItem('educore_absensi')) || {};
+
+let currentUser = null;
+let attendanceChartInstance = null;
+let clockInterval = null;
+
+// URL Spreadsheet Publikasi (.csv)
+const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSzTziMYccKpqpum3QRAgsY6fET9UOTVIIohcI5PVphoUGEa_TMIOiLFUaR3SQ_wNWlM10WEQ36XA0V/pub?output=csv';
+
+function saveDataToStorage() {
+    localStorage.setItem('educore_users', JSON.stringify(usersList));
+    localStorage.setItem('educore_employees', JSON.stringify(employeesList));
+    localStorage.setItem('educore_siswa', JSON.stringify(dataSiswa));
+    localStorage.setItem('educore_mapel', JSON.stringify(dataMapel));
+    localStorage.setItem('educore_nilai', JSON.stringify(dataNilai));
+    localStorage.setItem('educore_absensi', JSON.stringify(absensiRecords));
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const dateInput = document.getElementById('filterTanggalAbsensi');
+    if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+});
+
+function showToast(msg, type = 'success') {
+    const toast = document.getElementById('toast');
+    if (!toast) return;
+    toast.innerText = msg;
+    toast.className = `toast ${type}`;
+    setTimeout(() => toast.classList.add('hidden'), 3000);
+}
+
+/* HELPER PARSER CSV */
+function parseCSV(text) {
+    const lines = text.split('\n');
+    return lines.map(line => {
+        const row = [];
+        let inQuotes = false;
+        let currentCell = '';
+
+        for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            if (char === '"') {
+                inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+                row.push(currentCell.trim().replace(/^"|"$/g, ''));
+                currentCell = '';
+            } else {
+                currentCell += char;
+            }
+        }
+        row.push(currentCell.trim().replace(/^"|"$/g, ''));
+        return row;
+    });
+}
 
 /* SINKRONISASI DATA GOOGLE SHEETS */
 async function fetchGoogleSheetAttendance() {
@@ -42,12 +97,11 @@ async function fetchGoogleSheetAttendance() {
 
     if (!theadEl || !tbodyEl) return;
 
-    loadingEl.classList.remove('hidden');
+    if (loadingEl) loadingEl.classList.remove('hidden');
     tbodyEl.innerHTML = '';
     theadEl.innerHTML = '';
 
     try {
-        // Menggunakan CORS proxy agar request tidak diblokir oleh browser
         const proxyUrl = 'https://api.allorigins.win/raw?url=';
         const response = await fetch(proxyUrl + encodeURIComponent(GOOGLE_SHEET_CSV_URL));
 
@@ -58,11 +112,11 @@ async function fetchGoogleSheetAttendance() {
 
         if (!rows || rows.length === 0 || (rows.length === 1 && rows[0][0] === '')) {
             tbodyEl.innerHTML = '<tr><td colspan="10" style="text-align:center;">Data kosong.</td></tr>';
-            loadingEl.classList.add('hidden');
+            if (loadingEl) loadingEl.classList.add('hidden');
             return;
         }
 
-        // 1. Header Tabel
+        // Header Tabel
         const headers = rows[0];
         let headerHTML = '<tr>';
         headers.forEach(header => {
@@ -71,7 +125,7 @@ async function fetchGoogleSheetAttendance() {
         headerHTML += '</tr>';
         theadEl.innerHTML = headerHTML;
 
-        // 2. Baris Data Tabel
+        // Baris Data Tabel
         for (let i = 1; i < rows.length; i++) {
             const rowData = rows[i];
             if (rowData.length <= 1 && rowData[0] === '') continue;
@@ -88,9 +142,9 @@ async function fetchGoogleSheetAttendance() {
     } catch (error) {
         console.error('Gagal mengambil data dari Google Sheets:', error);
         showToast('Gagal memuat spreadsheet.', 'error');
-        tbodyEl.innerHTML = '<tr><td colspan="10" style="text-align:center; color:red;">Gagal memuat data. Pastikan opsi "Seluruh Dokumen" & "Nilai yang Dipisahkan Koma (.csv)" sudah dipilih saat Publikasikan ke Web.</td></tr>';
+        tbodyEl.innerHTML = '<tr><td colspan="10" style="text-align:center; color:red;">Gagal memuat data. Pastikan Google Sheets sudah dipublikasikan ke web sebagai format CSV.</td></tr>';
     } finally {
-        loadingEl.classList.add('hidden');
+        if (loadingEl) loadingEl.classList.add('hidden');
     }
 }
 
@@ -171,19 +225,11 @@ function applyRolePermissions(role) {
 
 function switchTab(tabName, event) {
     if (event) event.preventDefault();
-
-    // Proteksi keamanan tab khusus admin
-    if (tabName === 'rekap-absensi-gas' && currentUser?.role !== 'admin') {
-        showToast('Akses ditolak. Fitur ini khusus Admin!', 'error');
-        return;
-    }
-
     document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
     document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
 
-    const activeSection = document.getElementById(`section-${tabName}`);
-    if (activeSection) activeSection.classList.remove('hidden');
-
+    const sectionEl = document.getElementById(`section-${tabName}`);
+    if (sectionEl) sectionEl.classList.remove('hidden');
     if (event && event.target) event.target.classList.add('active');
 
     if (tabName === 'manajemen-hr') renderEmployees();
@@ -192,80 +238,6 @@ function switchTab(tabName, event) {
     if (tabName === 'manajemen-pembelajaran') renderPembelajaran();
     if (tabName === 'dashboard') renderDashboardAcademic();
     if (tabName === 'rekap-absensi-gas') fetchGoogleSheetAttendance();
-}
-
-/* SINKRONISASI DATA GOOGLE SHEETS (KHUSUS ADMIN) */
-async function fetchGoogleSheetAttendance() {
-    const loadingEl = document.getElementById('loadingSheet');
-    const theadEl = document.getElementById('theadGAS');
-    const tbodyEl = document.getElementById('tbodyGAS');
-
-    if (!theadEl || !tbodyEl) return;
-
-    loadingEl.classList.remove('hidden');
-    tbodyEl.innerHTML = '';
-    theadEl.innerHTML = '';
-
-    try {
-        const response = await fetch(GOOGLE_SHEET_CSV_URL);
-        if (!response.ok) throw new Error("Gagal terhubung ke Google Sheets.");
-
-        const dataText = await response.text();
-        const rows = parseCSV(dataText);
-
-        if (rows.length === 0) {
-            tbodyEl.innerHTML = '<tr><td colspan="10" style="text-align:center;">Data kosong.</td></tr>';
-            loadingEl.classList.add('hidden');
-            return;
-        }
-
-        // 1. Header Tabel
-        const headers = rows[0];
-        let headerHTML = '<tr>';
-        headers.forEach(header => {
-            headerHTML += `<th>${header}</th>`;
-        });
-        headerHTML += '</tr>';
-        theadEl.innerHTML = headerHTML;
-
-        // 2. Baris Data Tabel
-        for (let i = 1; i < rows.length; i++) {
-            const rowData = rows[i];
-            if (rowData.length <= 1 && rowData[0] === '') continue;
-
-            let rowHTML = '<tr>';
-            rowData.forEach(cell => {
-                rowHTML += `<td>${cell}</td>`;
-            });
-            rowHTML += '</tr>';
-            tbodyEl.innerHTML += rowHTML;
-        }
-
-        showToast('Data absensi spreadsheet berhasil dimuat!');
-    } catch (error) {
-        console.error('Gagal mengambil data dari Google Sheets:', error);
-        showToast('Gagal memuat spreadsheet. Pastikan sheet sudah dipublikasikan ke Web.', 'error');
-        tbodyEl.innerHTML = '<tr><td colspan="10" style="text-align:center; color:red;">Gagal memuat data. Silakan cek publikasi Spreadsheet Anda.</td></tr>';
-    } finally {
-        loadingEl.classList.add('hidden');
-    }
-}
-
-function parseCSV(text) {
-    const lines = text.split('\n');
-    return lines.map(line => {
-        const regex = /(?:\"([^\"]*)\"|([^,]+)|)/g;
-        const matches = [];
-        let match;
-        while ((match = regex.exec(line)) && match.index < line.length) {
-            if (match[1] !== undefined) {
-                matches.push(match[1]);
-            } else if (match[2] !== undefined) {
-                matches.push(match[2].trim());
-            }
-        }
-        return matches;
-    });
 }
 
 function toggleNotifDropdown() {
@@ -285,7 +257,7 @@ function renderNotifications() {
     if (currentUser.role === 'admin') {
         items = [
             { text: `Modul HR Aktif: ${employeesList.length} karyawan terdaftar.`, time: 'Baru saja' },
-            { text: 'Integrasi Spreadsheet Absensi Aktif.', time: '5 menit lalu' },
+            { text: 'Sistem EduCore v2.5 berjalan lancar.', time: '10 menit lalu' },
             { text: 'Laporan penggajian siap ditinjau.', time: '1 jam lalu' }
         ];
     } else if (currentUser.role === 'guru_tk') {
@@ -398,8 +370,8 @@ function renderSiswaTables(listSiswa, specificTingkat = null) {
     const tbodyTK = document.getElementById('tbodySiswaTK');
     const tbodySD = document.getElementById('tbodySiswaSD');
 
-    if (!specificTingkat || specificTingkat === 'TK') tbodyTK.innerHTML = '';
-    if (!specificTingkat || specificTingkat === 'SD') tbodySD.innerHTML = '';
+    if (!specificTingkat || specificTingkat === 'TK') if (tbodyTK) tbodyTK.innerHTML = '';
+    if (!specificTingkat || specificTingkat === 'SD') if (tbodySD) tbodySD.innerHTML = '';
 
     listSiswa.forEach(s => {
         const row = `<tr>
@@ -411,8 +383,8 @@ function renderSiswaTables(listSiswa, specificTingkat = null) {
             <td><button class="btn btn-danger" onclick="deleteSiswa('${s.nis}')">Hapus</button></td>
         </tr>`;
 
-        if (s.tingkat === 'TK' && (!specificTingkat || specificTingkat === 'TK')) tbodyTK.innerHTML += row;
-        if (s.tingkat === 'SD' && (!specificTingkat || specificTingkat === 'SD')) tbodySD.innerHTML += row;
+        if (s.tingkat === 'TK' && (!specificTingkat || specificTingkat === 'TK') && tbodyTK) tbodyTK.innerHTML += row;
+        if (s.tingkat === 'SD' && (!specificTingkat || specificTingkat === 'SD') && tbodySD) tbodySD.innerHTML += row;
     });
 }
 
@@ -506,7 +478,9 @@ function renderDashboardAcademic() {
 }
 
 function renderAttendanceChart() {
-    const ctx = document.getElementById('attendanceChart').getContext('2d');
+    const canvas = document.getElementById('attendanceChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
     
     if (attendanceChartInstance) {
         attendanceChartInstance.destroy();
@@ -544,25 +518,29 @@ function renderPembelajaran() {
     const nilaiFiltered = role === 'admin' ? dataNilai : dataNilai.filter(n => n.role === role);
 
     const tbodyMapel = document.getElementById('tbodyMapel');
-    tbodyMapel.innerHTML = '';
-    mapelFiltered.forEach(m => {
-        tbodyMapel.innerHTML += `<tr><td><b>${m.kode}</b></td><td>${m.nama}</td><td>${m.role.replace('_', ' ')}</td></tr>`;
-    });
+    if (tbodyMapel) {
+        tbodyMapel.innerHTML = '';
+        mapelFiltered.forEach(m => {
+            tbodyMapel.innerHTML += `<tr><td><b>${m.kode}</b></td><td>${m.nama}</td><td>${m.role.replace('_', ' ')}</td></tr>`;
+        });
+    }
 
     const tbodyNilai = document.getElementById('tbodyNilai');
-    tbodyNilai.innerHTML = '';
-    nilaiFiltered.forEach(n => {
-        const sObj = dataSiswa.find(s => s.nis === n.nis);
-        const mObj = dataMapel.find(m => m.kode === n.mapelKode);
-        tbodyNilai.innerHTML += `
-            <tr>
-                <td><a class="student-link" onclick="openModalStudentProfile('${n.nis}')">${sObj ? sObj.nama : n.nis}</a></td>
-                <td>${mObj ? mObj.nama : n.mapelKode}</td>
-                <td><b>${n.nilai}</b></td>
-                <td><button class="btn btn-danger" onclick="deleteNilai('${n.id}')">Hapus</button></td>
-            </tr>
-        `;
-    });
+    if (tbodyNilai) {
+        tbodyNilai.innerHTML = '';
+        nilaiFiltered.forEach(n => {
+            const sObj = dataSiswa.find(s => s.nis === n.nis);
+            const mObj = dataMapel.find(m => m.kode === n.mapelKode);
+            tbodyNilai.innerHTML += `
+                <tr>
+                    <td><a class="student-link" onclick="openModalStudentProfile('${n.nis}')">${sObj ? sObj.nama : n.nis}</a></td>
+                    <td>${mObj ? mObj.nama : n.mapelKode}</td>
+                    <td><b>${n.nilai}</b></td>
+                    <td><button class="btn btn-danger" onclick="deleteNilai('${n.id}')">Hapus</button></td>
+                </tr>
+            `;
+        });
+    }
 }
 
 function openModalMapel() { document.getElementById('modalMapel').classList.remove('hidden'); }
@@ -628,6 +606,7 @@ function deleteNilai(id) {
 function renderAbsensi() {
     const tbody = document.getElementById('tbodyAbsensi');
     const selectedDate = document.getElementById('filterTanggalAbsensi').value;
+    if (!tbody) return;
     tbody.innerHTML = '';
 
     if (!absensiRecords[selectedDate]) absensiRecords[selectedDate] = {};
