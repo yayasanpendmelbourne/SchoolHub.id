@@ -1,4 +1,4 @@
-// Database Kredensial Valid
+// Database Kredensial Valid & Role
 const VALID_USERS = {
     'admin': { pass: 'admin123', role: 'admin', name: 'Administrator Staff', avatar: 'Admin' },
     'gurutk': { pass: 'tk123', role: 'guru_tk', name: 'Siti Rahma, S.Pd.', avatar: 'Rahma' },
@@ -31,7 +31,7 @@ function showToast(msg, type = 'success') {
     setTimeout(() => toast.classList.add('hidden'), 3000);
 }
 
-// Handler Auth
+// Handler Auth Login
 function handleLogin(e) {
     e.preventDefault();
     const uInput = document.getElementById('loginUser').value.trim();
@@ -41,11 +41,11 @@ function handleLogin(e) {
 
     const userObj = VALID_USERS[uInput];
 
-    // Check Credential Validasi
+    // Validasi Kredensial
     if (userObj && userObj.pass === pInput && userObj.role === rInput) {
         currentUser = { username: uInput, ...userObj };
         
-        // Show App UI Smooth
+        // Render Dashboard App
         document.getElementById('loginPage').classList.add('hidden');
         document.getElementById('mainApp').classList.remove('hidden');
 
@@ -57,10 +57,9 @@ function handleLogin(e) {
         renderAllData();
         showToast(`Selamat datang kembali, ${currentUser.name}!`);
     } else {
-        // Shake Error Animation
         authCard.classList.add('shake');
         setTimeout(() => authCard.classList.remove('shake'), 400);
-        showToast('Username, Password, atau Role salah!', 'error');
+        showToast('Username, Password, atau Role tidak cocok!', 'error');
     }
 }
 
@@ -83,20 +82,25 @@ function showLoginPage() {
 
 function handleReset(e) {
     e.preventDefault();
-    showToast('Link reset password telah dikirim ke email!');
+    showToast('Link instruksi reset password telah dikirim ke email!');
     showLoginPage();
 }
 
-// Role-based Access Control
+// Strict Role-Based Access Control (Menu & Action Filter)
 function applyRolePermissions(role) {
+    // Hide/Show Sidebar Menu berbasis Role
     document.querySelectorAll('.sidebar-menu li').forEach(el => {
-        const isRoleAllowed = Array.from(el.classList).some(c => c === `role-${role}` || c === 'menu-divider');
-        el.classList.toggle('hidden', !isRoleAllowed);
+        const isAllowed = Array.from(el.classList).some(c => c === `role-${role}` || c === 'menu-divider');
+        el.classList.toggle('hidden', !isAllowed);
     });
 
-    document.querySelectorAll('.role-admin').forEach(el => {
+    // Tampilkan tombol khusus Admin (Tambah Siswa, Guru, dll)
+    document.querySelectorAll('.role-admin-only').forEach(el => {
         el.classList.toggle('hidden', role !== 'admin');
     });
+
+    // Arahkan otomatis ke Dashboard saat pertama kali login
+    switchTab('dashboard');
 }
 
 // Tab Switcher Smooth
@@ -133,6 +137,7 @@ function renderAllData() {
 
     renderBukuKerja();
 
+    // Update Counter Stat
     document.getElementById('statSiswaTK').innerText = dataSiswa.filter(s => s.tingkat === 'TK').length;
     document.getElementById('statSiswaSD').innerText = dataSiswa.filter(s => s.tingkat === 'SD').length;
     document.getElementById('statGuru').innerText = dataGuru.length;
@@ -160,8 +165,65 @@ function renderBukuKerja() {
     });
 }
 
+// Modal Siswa Operations
+function openModalSiswa(tingkat) {
+    document.getElementById('siswaTingkat').value = tingkat;
+    document.getElementById('modalSiswaTitle').innerText = `Tambah Murid Baru (${tingkat})`;
+    document.getElementById('modalSiswa').classList.remove('hidden');
+}
+function closeModalSiswa() { 
+    document.getElementById('modalSiswa').classList.add('hidden'); 
+    document.getElementById('formSiswa').reset();
+}
+
+function saveSiswa(e) {
+    e.preventDefault();
+    dataSiswa.push({
+        nis: document.getElementById('siswaNis').value,
+        nama: document.getElementById('siswaNama').value,
+        tingkat: document.getElementById('siswaTingkat').value,
+        kelas: document.getElementById('siswaKelas').value,
+        ortu: document.getElementById('siswaOrtu').value,
+        hp: document.getElementById('siswaHp').value,
+        status: 'Aktif'
+    });
+    renderAllData();
+    closeModalSiswa();
+    showToast('Data Siswa berhasil ditambahkan!');
+}
+
+// Modal Guru Operations (Khusus Admin)
+function openModalGuru(tingkat) {
+    document.getElementById('guruTingkat').value = tingkat;
+    document.getElementById('modalGuruTitle').innerText = `Tambah Staff Guru (${tingkat})`;
+    document.getElementById('modalGuru').classList.remove('hidden');
+}
+function closeModalGuru() { 
+    document.getElementById('modalGuru').classList.add('hidden'); 
+    document.getElementById('formGuru').reset();
+}
+
+function saveGuru(e) {
+    e.preventDefault();
+    dataGuru.push({
+        nip: document.getElementById('guruNip').value,
+        nama: document.getElementById('guruNama').value,
+        tingkat: document.getElementById('guruTingkat').value,
+        jabatan: document.getElementById('guruJabatan').value,
+        mapel: document.getElementById('guruMapel').value,
+        hp: document.getElementById('guruHp').value
+    });
+    renderAllData();
+    closeModalGuru();
+    showToast('Data Guru baru berhasil disimpan!');
+}
+
+// Modal Buku Kerja Operations
 function openModalBukuKerja() { document.getElementById('modalBukuKerja').classList.remove('hidden'); }
-function closeModalBukuKerja() { document.getElementById('modalBukuKerja').classList.add('hidden'); }
+function closeModalBukuKerja() { 
+    document.getElementById('modalBukuKerja').classList.add('hidden'); 
+    document.getElementById('formBukuKerja').reset();
+}
 
 function saveBukuKerja(e) {
     e.preventDefault();
@@ -174,11 +236,11 @@ function saveBukuKerja(e) {
     });
     renderBukuKerja();
     closeModalBukuKerja();
-    showToast('Dokumen Buku Kerja berhasil disubmit!');
+    showToast('Dokumen Buku Kerja berhasil dikirim!');
 }
 
 function validasiDokumen(index) {
     dataBukuKerja[index].status = 'Tervalidasi';
     renderBukuKerja();
-    showToast('Dokumen berhasil divalidasi!');
+    showToast('Dokumen berhasil divalidasi oleh Admin!');
 }
