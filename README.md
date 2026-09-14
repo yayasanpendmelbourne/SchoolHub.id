@@ -1,22 +1,13 @@
-# School Management System (SMS) - E-Portal Sekolah TK & SD
+# School Management System (SMS) & Buku Kerja Digital
 
-Sistem Informasi Manajemen Sekolah berbasis Web interaktif untuk mengelola data operasional pendidikan tingkat TK dan SD.
+E-Portal Sistem Informasi Sekolah TK & SD yang dilengkapi dengan autentikasi multi-role dan administrasi guru bebas kertas (*paperless*).
 
-## Fitur Utama
-1. **Dashboard Ringkasan Statistik:**
-   - Rekapitulasi Otomatis Siswa TK & SD.
-   - Total Guru & Staff.
-   - Jumlah Kelas Aktif.
-2. **Manajemen Data Siswa:**
-   - Fitur Tambah & Hapus Data Siswa.
-   - Mengelola NIS/NISN, Nama, Tingkat (TK/SD), Orang Tua/Wali, Kontak HP, Alamat, Foto, dan Status Siswa.
-3. **Manajemen Guru & Staff:**
-   - Fitur Tambah & Hapus Data Guru.
-   - Pengaturan NIP, Jabatan, Mata Pelajaran, dan Kelas yang Diampu.
-4. **Jadwal Pelajaran:**
-   - Informasi mata pelajaran harian dan guru pengampu.
-
-## Panduan Penggunaan
-1. Clone repositori ini atau download file-filenya.
-2. Buka file `index.html` di browser web (Chrome, Edge, Firefox).
-3. Klik tombol **+ Tambah Siswa Baru** atau **+ Tambah Guru Baru** untuk memasukkan data. Statistik di dashboard akan bertambah secara otomatis.
+## Fitur Unggulan
+1. **Multi-Role Login & Reset Password:**
+   - **Admin/Staff:** Akses penuh seluruh data, penambahan siswa/guru, dan verifikasi validasi dokumen administrasi.
+   - **Guru TK & Guru SD:** Akses sesuai dengan tingkat mengajar masing-masing.
+2. **Pemisahan Modul TK & SD:**
+   - Rekapitulasi data siswa dan guru terpisah antara TK dan SD.
+3. **Buku Kerja Guru (Administrasi Paperless):**
+   - Pembuatan dokumen administrasi berbasis templat (RPP, PROTA, PROMES, KKTP).
+   - Validasi dokumen digital terintegrasi di dalam sistem tanpa cetak kertas.
