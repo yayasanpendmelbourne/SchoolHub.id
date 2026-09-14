@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Chart.js untuk Attendance Trend -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -66,20 +68,16 @@
                 <ul>
                     <li class="role-admin role-guru_tk role-guru_sd"><a href="#" class="nav-link active" onclick="switchTab('dashboard', event)">⚡ Dashboard</a></li>
                     
-                    <!-- PENGATURAN SISTEM & MANAJEMEN AKADEMIK -->
                     <li class="menu-divider role-admin role-guru_tk role-guru_sd">PENGATURAN SISTEM</li>
                     <li class="role-admin"><a href="#" class="nav-link" onclick="switchTab('manajemen-user', event)">🔐 Manajemen Pengguna (Akun)</a></li>
                     <li class="role-guru_tk role-guru_sd"><a href="#" class="nav-link" onclick="switchTab('manajemen-pembelajaran', event)">📚 Kelola Mapel & Nilai Siswa</a></li>
 
-                    <!-- LAYANAN TK -->
                     <li class="menu-divider role-admin role-guru_tk">LAYANAN TK</li>
                     <li class="role-admin role-guru_tk"><a href="#" class="nav-link" onclick="switchTab('siswa-tk', event)">👶 Murid TK</a></li>
                     
-                    <!-- LAYANAN SD -->
                     <li class="menu-divider role-admin role-guru_sd">LAYANAN SD</li>
                     <li class="role-admin role-guru_sd"><a href="#" class="nav-link" onclick="switchTab('siswa-sd', event)">🎒 Murid SD</a></li>
                     
-                    <!-- KEGIATAN HARIAN -->
                     <li class="menu-divider role-admin role-guru_tk role-guru_sd">KEGIATAN HARIAN</li>
                     <li class="role-admin role-guru_tk role-guru_sd"><a href="#" class="nav-link" onclick="switchTab('absensi', event)">📅 Absensi Siswa</a></li>
                 </ul>
@@ -91,6 +89,24 @@
         <!-- Main Content Area -->
         <main class="content">
             
+            <!-- HEADER NOTIFICATION CENTER BAR -->
+            <div class="top-nav-bar">
+                <div class="notif-dropdown-wrapper">
+                    <button class="btn-notif" onclick="toggleNotifDropdown()">
+                        🔔 <span class="notif-badge" id="notifCount">0</span>
+                    </button>
+                    <div id="notifDropdown" class="notif-card hidden">
+                        <div class="notif-header">
+                            <h4>Pemberitahuan</h4>
+                            <span class="badge-role" id="notifRoleTag">Role</span>
+                        </div>
+                        <div id="notifList" class="notif-body">
+                            <!-- Dynamic Notif Items -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- DASHBOARD GURU & ADMIN -->
             <div id="section-dashboard" class="tab-content fade-in-up">
                 <header class="page-header">
@@ -117,7 +133,7 @@
                             </div>
                         </div>
 
-                        <div class="card p-4 style-schedule">
+                        <div class="card p-4 style-schedule mt-4">
                             <h4>Mata Pelajaran Aktif</h4>
                             <div id="dashMapelList" class="mt-2"></div>
                         </div>
@@ -137,6 +153,14 @@
                             <div class="card stat-box green-light-border">
                                 <small>Data Nilai Terinput</small>
                                 <h1 class="text-green" id="dashTotalNilai">0</h1>
+                            </div>
+                        </div>
+
+                        <!-- ATTENDANCE TREND CHART (KHUSUS GURU SD & TK) -->
+                        <div id="attendanceTrendCard" class="card p-4 mt-4">
+                            <h4>📈 Attendance Trend (Kehadiran Bulan Ini)</h4>
+                            <div class="chart-container" style="position: relative; height:200px; margin-top: 10px;">
+                                <canvas id="attendanceChart"></canvas>
                             </div>
                         </div>
 
@@ -222,12 +246,15 @@
                         <h1>Data Murid TK</h1>
                         <p>Daftar peserta didik TK.</p>
                     </div>
-                    <button class="btn btn-primary" onclick="openModalSiswa('TK')">+ Tambah Murid TK</button>
+                    <div class="header-action-group">
+                        <input type="text" class="input-search" placeholder="🔍 Cari nama/NIS TK..." onkeyup="filterSiswaTable('TK', this.value)">
+                        <button class="btn btn-primary" onclick="openModalSiswa('TK')">+ Tambah Murid TK</button>
+                    </div>
                 </header>
                 <div class="card table-card">
                     <table>
                         <thead>
-                            <tr><th>NIS</th><th>Nama Siswa</th><th>Kelompok</th><th>Orang Tua</th><th>HP</th><th>Aksi</th></tr>
+                            <tr><th>NIS</th><th>Nama Siswa (Klik Profil)</th><th>Kelompok</th><th>Orang Tua</th><th>HP</th><th>Aksi</th></tr>
                         </thead>
                         <tbody id="tbodySiswaTK"></tbody>
                     </table>
@@ -241,12 +268,15 @@
                         <h1>Data Murid SD</h1>
                         <p>Daftar peserta didik SD.</p>
                     </div>
-                    <button class="btn btn-primary" onclick="openModalSiswa('SD')">+ Tambah Murid SD</button>
+                    <div class="header-action-group">
+                        <input type="text" class="input-search" placeholder="🔍 Cari nama/NISN SD..." onkeyup="filterSiswaTable('SD', this.value)">
+                        <button class="btn btn-primary" onclick="openModalSiswa('SD')">+ Tambah Murid SD</button>
+                    </div>
                 </header>
                 <div class="card table-card">
                     <table>
                         <thead>
-                            <tr><th>NISN</th><th>Nama Siswa</th><th>Kelas</th><th>Orang Tua</th><th>HP</th><th>Aksi</th></tr>
+                            <tr><th>NISN</th><th>Nama Siswa (Klik Profil)</th><th>Kelas</th><th>Orang Tua</th><th>HP</th><th>Aksi</th></tr>
                         </thead>
                         <tbody id="tbodySiswaSD"></tbody>
                     </table>
@@ -279,7 +309,42 @@
         </main>
     </div>
 
-    <!-- KOP SURAT PRINT FORMAT PDF WITH CUSTOM LOGO -->
+    <!-- MODAL STUDENT PROFILE DETAIL -->
+    <div id="modalStudentProfile" class="modal-backdrop hidden">
+        <div class="modal-card slide-up" style="max-width: 650px;">
+            <div class="student-profile-header">
+                <img id="profileAvatar" src="" class="profile-avatar-lg" alt="Student">
+                <div>
+                    <h2 id="profileNama">Nama Murid</h2>
+                    <p class="text-muted"><span id="profileTingkatKelas">TK B</span> • NIS: <span id="profileNis">101</span></p>
+                </div>
+            </div>
+            <hr class="mt-2 mb-2">
+            <div class="grid-2-col">
+                <div>
+                    <p><strong>Nama Orang Tua:</strong> <span id="profileOrtu">-</span></p>
+                    <p><strong>No. HP Orang Tua:</strong> <span id="profileHp">-</span></p>
+                </div>
+                <div>
+                    <p><strong>Status Akademik:</strong> <span class="badge-role">Aktif</span></p>
+                </div>
+            </div>
+
+            <h4 class="mt-4">Riwayat Nilai Siswa</h4>
+            <div class="table-responsive mt-2 mb-2">
+                <table>
+                    <thead><tr><th>Mata Pelajaran</th><th>Nilai</th><th>Catatan</th></tr></thead>
+                    <tbody id="profileTbodyNilai"></tbody>
+                </table>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModalStudentProfile()">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- KOP SURAT PRINT FORMAT PDF -->
     <div id="pdfExportContainer" class="pdf-container">
         <div class="kop-surat">
             <img src="https://lh3.googleusercontent.com/d/1d01Ip9TgSPTBK3FjfvL4vxwJSS9ig3Wd" class="kop-logo-img" alt="Logo Kop">
