@@ -30,38 +30,68 @@ const defaultNilai = [
 ];
 
 // LINK SPREADSHEET TERBARU (Diubah ke format ekspor CSV)
-const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSzTziMYccKpqpum3QRAgsY6fET9UOTVIIohcI5PVphoUGEa_TMIOiLFUaR3SQ_wNWlM10WEQ36XA0V/pub?output=csv';
+// Mengubah URL pubhtml menjadi URL publikasi CSV yang tepat
+const ORIGINAL_PUBHTML_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSzTziMYccKpqpum3QRAgsY6fET9UOTVIIohcI5PVphoUGEa_TMIOiLFUaR3SQ_wNWlM10WEQ36XA0V/pubhtml';
+const GOOGLE_SHEET_CSV_URL = ORIGINAL_PUBHTML_URL.replace('/pubhtml', '/pub?output=csv');
 
-let usersList = JSON.parse(localStorage.getItem('educore_users')) || defaultUsers;
-let employeesList = JSON.parse(localStorage.getItem('educore_employees')) || defaultEmployees;
-let dataSiswa = JSON.parse(localStorage.getItem('educore_siswa')) || defaultSiswa;
-let dataMapel = JSON.parse(localStorage.getItem('educore_mapel')) || defaultMapel;
-let dataNilai = JSON.parse(localStorage.getItem('educore_nilai')) || defaultNilai;
-let absensiRecords = JSON.parse(localStorage.getItem('educore_absensi')) || {};
+/* SINKRONISASI DATA GOOGLE SHEETS */
+async function fetchGoogleSheetAttendance() {
+    const loadingEl = document.getElementById('loadingSheet');
+    const theadEl = document.getElementById('theadGAS');
+    const tbodyEl = document.getElementById('tbodyGAS');
 
-let currentUser = null;
-let attendanceChartInstance = null;
-let clockInterval = null;
+    if (!theadEl || !tbodyEl) return;
 
-function saveDataToStorage() {
-    localStorage.setItem('educore_users', JSON.stringify(usersList));
-    localStorage.setItem('educore_employees', JSON.stringify(employeesList));
-    localStorage.setItem('educore_siswa', JSON.stringify(dataSiswa));
-    localStorage.setItem('educore_mapel', JSON.stringify(dataMapel));
-    localStorage.setItem('educore_nilai', JSON.stringify(dataNilai));
-    localStorage.setItem('educore_absensi', JSON.stringify(absensiRecords));
-}
+    loadingEl.classList.remove('hidden');
+    tbodyEl.innerHTML = '';
+    theadEl.innerHTML = '';
 
-document.addEventListener("DOMContentLoaded", () => {
-    const dateInput = document.getElementById('filterTanggalAbsensi');
-    if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
-});
+    try {
+        // Menggunakan CORS proxy agar request tidak diblokir oleh browser
+        const proxyUrl = 'https://api.allorigins.win/raw?url=';
+        const response = await fetch(proxyUrl + encodeURIComponent(GOOGLE_SHEET_CSV_URL));
 
-function showToast(msg, type = 'success') {
-    const toast = document.getElementById('toast');
-    toast.innerText = msg;
-    toast.className = `toast ${type}`;
-    setTimeout(() => toast.classList.add('hidden'), 3000);
+        if (!response.ok) throw new Error("Gagal terhubung ke Google Sheets.");
+
+        const dataText = await response.text();
+        const rows = parseCSV(dataText);
+
+        if (!rows || rows.length === 0 || (rows.length === 1 && rows[0][0] === '')) {
+            tbodyEl.innerHTML = '<tr><td colspan="10" style="text-align:center;">Data kosong.</td></tr>';
+            loadingEl.classList.add('hidden');
+            return;
+        }
+
+        // 1. Header Tabel
+        const headers = rows[0];
+        let headerHTML = '<tr>';
+        headers.forEach(header => {
+            headerHTML += `<th>${header}</th>`;
+        });
+        headerHTML += '</tr>';
+        theadEl.innerHTML = headerHTML;
+
+        // 2. Baris Data Tabel
+        for (let i = 1; i < rows.length; i++) {
+            const rowData = rows[i];
+            if (rowData.length <= 1 && rowData[0] === '') continue;
+
+            let rowHTML = '<tr>';
+            rowData.forEach(cell => {
+                rowHTML += `<td>${cell}</td>`;
+            });
+            rowHTML += '</tr>';
+            tbodyEl.innerHTML += rowHTML;
+        }
+
+        showToast('Data absensi spreadsheet berhasil dimuat!');
+    } catch (error) {
+        console.error('Gagal mengambil data dari Google Sheets:', error);
+        showToast('Gagal memuat spreadsheet.', 'error');
+        tbodyEl.innerHTML = '<tr><td colspan="10" style="text-align:center; color:red;">Gagal memuat data. Pastikan opsi "Seluruh Dokumen" & "Nilai yang Dipisahkan Koma (.csv)" sudah dipilih saat Publikasikan ke Web.</td></tr>';
+    } finally {
+        loadingEl.classList.add('hidden');
+    }
 }
 
 /* KATA SAMBUTAN & JAM REALTIME */
