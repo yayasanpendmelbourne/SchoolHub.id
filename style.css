@@ -27,6 +27,10 @@ body {
 
 .hidden { display: none !important; }
 
+/* Filter Absensi */
+.filter-absensi-wrapper { display: flex; gap: 12px; align-items: center; }
+.input-date { padding: 8px 14px; border-radius: 8px; border: 1px solid #cbd5e1; font-weight: 600; }
+
 /* Animasi */
 .fade-in-up { animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1); }
 .slide-up { animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -183,3 +187,29 @@ tr:hover td { background: #f8fafc; }
 .form-group-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .full-width { grid-column: span 2; }
 .modal-actions { margin-top: 1.8rem; display: flex; justify-content: flex-end; gap: 12px; }
+
+/* KOP SURAT PRINT FORMAT (PDF TEMPLATE) */
+.pdf-container {
+    position: absolute; left: -9999px; top: -9999px; width: 800px;
+    background: white; padding: 40px; color: black; font-family: 'Times New Roman', Times, serif;
+}
+.kop-surat { display: flex; align-items: center; gap: 20px; }
+.kop-logo {
+    width: 70px; height: 70px; background: #2563eb; color: white;
+    font-size: 2.5rem; font-weight: bold; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+}
+.kop-text { text-align: center; flex: 1; }
+.kop-text h2 { font-size: 1.3rem; margin-bottom: 2px; text-transform: uppercase; }
+.kop-text h3 { font-size: 1.1rem; margin-bottom: 4px; font-weight: normal; }
+.kop-text p { font-size: 0.75rem; color: #333; }
+.kop-line { border: none; height: 3px; background: black; margin-top: 10px; }
+.kop-line-thin { border: none; height: 1px; background: black; margin-top: 2px; margin-bottom: 20px; }
+
+.pdf-title { text-align: center; font-size: 1.1rem; text-decoration: underline; margin-bottom: 15px; }
+.pdf-meta { margin-bottom: 15px; font-size: 0.9rem; line-height: 1.5; }
+.pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+.pdf-table th, .pdf-table td { border: 1px solid black; padding: 8px; font-size: 0.85rem; text-align: left; background: transparent; }
+.pdf-table th { font-weight: bold; text-align: center; background: #f2f2f2; }
+.pdf-footer { display: flex; justify-content: space-between; margin-top: 40px; }
+.signature-box { text-align: center; width: 200px; font-size: 0.9rem; }
