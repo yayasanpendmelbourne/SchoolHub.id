@@ -29,8 +29,8 @@ const defaultNilai = [
     { id: '2', nis: '201', mapelKode: 'SD-MTK', nilai: '90', catatan: 'Sangat paham perkalian dasar', role: 'guru_sd' }
 ];
 
-// URL Publikasi CSV dari Spreadsheet Google Sheets kamu
-const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSmXgX-pub?gid=2102192841&single=true&output=csv';
+// LINK SPREADSHEET TERBARU (Diubah ke format ekspor CSV)
+const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSzTziMYccKpqpum3QRAgsY6fET9UOTVIIohcI5PVphoUGEa_TMIOiLFUaR3SQ_wNWlM10WEQ36XA0V/pub?output=csv';
 
 let usersList = JSON.parse(localStorage.getItem('educore_users')) || defaultUsers;
 let employeesList = JSON.parse(localStorage.getItem('educore_employees')) || defaultEmployees;
@@ -215,7 +215,7 @@ async function fetchGoogleSheetAttendance() {
     } catch (error) {
         console.error('Gagal mengambil data dari Google Sheets:', error);
         showToast('Gagal memuat spreadsheet. Pastikan sheet sudah dipublikasikan ke Web.', 'error');
-        tbodyEl.innerHTML = '<tr><td colspan="10" style="text-align:center; color:red;">Gagal memuat data. Silakan klik File > Bagikan > Publikasikan ke Web (.csv) di Spreadsheet Anda.</td></tr>';
+        tbodyEl.innerHTML = '<tr><td colspan="10" style="text-align:center; color:red;">Gagal memuat data. Silakan cek publikasi Spreadsheet Anda.</td></tr>';
     } finally {
         loadingEl.classList.add('hidden');
     }
