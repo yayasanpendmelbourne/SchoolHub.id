@@ -83,6 +83,10 @@
                     <li class="menu-divider role-admin role-guru_tk role-guru_sd">KEGIATAN HARIAN</li>
                     <li class="role-admin role-guru_tk role-guru_sd"><a href="#" class="nav-link" onclick="switchTab('absensi', event)">📅 Absensi Internal Siswa</a></li>
                     <li class="role-admin role-guru_tk role-guru_sd"><a href="#" class="nav-link" onclick="switchTab('absensi-external', event)">📲 Portal Absensi Online (GAS)</a></li>
+                    
+                    <!-- REKAP ABSENSI SPREADSHEET (KHUSUS ADMIN) -->
+                    <li class="menu-divider role-admin">REKAP ABSENSI SPREADSHEET</li>
+                    <li class="role-admin"><a href="#" class="nav-link" onclick="switchTab('rekap-absensi-gas', event)">📊 Hasil Absensi Google Sheets</a></li>
                 </ul>
             </nav>
 
@@ -186,7 +190,7 @@
                 </div>
             </div>
 
-            <!-- FITUR BARU: MANAJEMEN HR (ADMIN ONLY) -->
+            <!-- MANAJEMEN HR (ADMIN ONLY) -->
             <div id="section-manajemen-hr" class="tab-content hidden fade-in-up">
                 <header class="page-header">
                     <div>
@@ -230,6 +234,32 @@
                 </header>
                 <div class="card p-4">
                     <iframe src="https://script.google.com/macros/s/AKfycbzlD9k6c_2NWSDV1G71ksokRZor46YRN26OdgmeBzOoPhL1mJpBXMOW3gAIb4CN_CN4Ig/exec" class="external-app-frame"></iframe>
+                </div>
+            </div>
+
+            <!-- SECTION REKAP ABSENSI SPREADSHEET (KHUSUS ADMIN) -->
+            <div id="section-rekap-absensi-gas" class="tab-content hidden fade-in-up">
+                <header class="page-header">
+                    <div>
+                        <h1>Hasil Absensi Google Sheets</h1>
+                        <p>Rekapitulasi hasil absensi pengguna secara real-time dari Spreadsheet.</p>
+                    </div>
+                    <div class="header-action-group">
+                        <button class="btn btn-primary" onclick="fetchGoogleSheetAttendance()">🔄 Sinkronkan Data</button>
+                        <a href="https://docs.google.com/spreadsheets/d/1DZRNmEpVGEx7OvApFrtc3SsHP43099fF_gRtbzEhOW8/edit?gid=2102192841#gid=2102192841" target="_blank" class="btn btn-secondary">🔗 Buka Spreadsheet Original</a>
+                    </div>
+                </header>
+
+                <div class="card table-card">
+                    <div id="loadingSheet" class="hidden loading-container">
+                        <p>⏳ Memuat data absensi dari Google Sheets...</p>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead id="theadGAS"></thead>
+                            <tbody id="tbodyGAS"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
