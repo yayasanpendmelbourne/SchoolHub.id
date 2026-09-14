@@ -1,3 +1,4 @@
+// --- DATA DEFAULT INITIALIZATION ---
 const defaultUsers = {
     'admin': { pass: 'admin123', role: 'admin', name: 'Administrator Staff', avatar: 'Admin' },
     'gurutk': { pass: 'tk123', role: 'guru_tk', name: 'Siti Rahma, S.Pd.', avatar: 'Rahma' },
@@ -29,6 +30,7 @@ const defaultNilai = [
     { id: '2', nis: '201', mapelKode: 'SD-MTK', nilai: '90', catatan: 'Sangat paham perkalian dasar', role: 'guru_sd' }
 ];
 
+// Load State dari LocalStorage / Default
 let usersList = JSON.parse(localStorage.getItem('educore_users')) || defaultUsers;
 let employeesList = JSON.parse(localStorage.getItem('educore_employees')) || defaultEmployees;
 let dataSiswa = JSON.parse(localStorage.getItem('educore_siswa')) || defaultSiswa;
@@ -40,7 +42,6 @@ let currentUser = null;
 let attendanceChartInstance = null;
 let clockInterval = null;
 
-// URL Spreadsheet Publikasi (.csv)
 const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSzTziMYccKpqpum3QRAgsY6fET9UOTVIIohcI5PVphoUGEa_TMIOiLFUaR3SQ_wNWlM10WEQ36XA0V/pub?output=csv';
 
 function saveDataToStorage() {
@@ -52,9 +53,16 @@ function saveDataToStorage() {
     localStorage.setItem('educore_absensi', JSON.stringify(absensiRecords));
 }
 
+// Event Listener Utama saat Halaman Selesai Dimuat
 document.addEventListener("DOMContentLoaded", () => {
     const dateInput = document.getElementById('filterTanggalAbsensi');
     if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+
+    // Binding Form Login secara Aman
+    const loginForm = document.getElementById('formLogin');
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
+    }
 });
 
 function showToast(msg, type = 'success') {
@@ -62,10 +70,94 @@ function showToast(msg, type = 'success') {
     if (!toast) return;
     toast.innerText = msg;
     toast.className = `toast ${type}`;
+    toast.classList.remove('hidden');
     setTimeout(() => toast.classList.add('hidden'), 3000);
 }
 
-/* HELPER PARSER CSV */
+// --- FUNGSI LOGIN & PORTAL NAVIGASI ---
+function handleLogin(e) {
+    if (e) e.preventDefault();
+
+    const uInputEl = document.getElementById('loginUser');
+    const pInputEl = document.getElementById('loginPass');
+    const rInputEl = document.getElementById('loginRole');
+
+    if (!uInputEl || !pInputEl || !rInputEl) return;
+
+    const uInput = uInputEl.value.trim();
+    const pInput = pInputEl.value.trim();
+    const rInput = rInputEl.value;
+
+    const userObj = usersList[uInput];
+
+    if (userObj && userObj.pass === pInput && userObj.role === rInput) {
+        currentUser = { username: uInput, ...userObj };
+
+        // Pindah Tampilan ke Portal Utama
+        const loginPage = document.getElementById('loginPage');
+        const mainApp = document.getElementById('mainApp');
+
+        if (loginPage) loginPage.classList.add('hidden');
+        if (mainApp) mainApp.classList.remove('hidden');
+
+        // Render Profil Pengguna
+        const userNameDisplay = document.getElementById('userNameDisplay');
+        const userRoleBadge = document.getElementById('userRoleBadge');
+        const userAvatar = document.getElementById('userAvatar');
+
+        if (userNameDisplay) userNameDisplay.innerText = currentUser.name;
+        if (userRoleBadge) userRoleBadge.innerText = currentUser.role.replace('_', ' ');
+        if (userAvatar) userAvatar.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.avatar || currentUser.name}`;
+
+        applyRolePermissions(currentUser.role);
+        startRealtimeClock();
+        renderNotifications();
+        renderAllData();
+        showToast('Login berhasil! Selamat datang.');
+    } else {
+        showToast('Username, Password, atau Role salah!', 'error');
+    }
+}
+
+function handleLogout() {
+    currentUser = null;
+    if (clockInterval) clearInterval(clockInterval);
+
+    const mainApp = document.getElementById('mainApp');
+    const loginPage = document.getElementById('loginPage');
+
+    if (mainApp) mainApp.classList.add('hidden');
+    if (loginPage) loginPage.classList.remove('hidden');
+    showToast('Berhasil keluar dari portal.');
+}
+
+function applyRolePermissions(role) {
+    document.querySelectorAll('.sidebar-menu li').forEach(el => {
+        const isAllowed = Array.from(el.classList).some(c => c === `role-${role}` || c === 'menu-divider');
+        el.classList.toggle('hidden', !isAllowed);
+    });
+
+    switchTab('dashboard');
+}
+
+function switchTab(tabName, event) {
+    if (event) event.preventDefault();
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+
+    const sectionEl = document.getElementById(`section-${tabName}`);
+    if (sectionEl) sectionEl.classList.remove('hidden');
+    if (event && event.target) event.target.classList.add('active');
+
+    if (tabName === 'manajemen-hr') renderEmployees();
+    if (tabName === 'absensi') renderAbsensi();
+    if (tabName === 'manajemen-user') renderUsers();
+    if (tabName === 'manajemen-pembelajaran') renderPembelajaran();
+    if (tabName === 'dashboard') renderDashboardAcademic();
+    if (tabName === 'rekap-absensi-gas') fetchGoogleSheetAttendance();
+}
+
+// --- HELPER PARSER CSV & GOOGLE SHEETS ---
 function parseCSV(text) {
     const lines = text.split('\n');
     return lines.map(line => {
@@ -89,7 +181,6 @@ function parseCSV(text) {
     });
 }
 
-/* SINKRONISASI DATA GOOGLE SHEETS */
 async function fetchGoogleSheetAttendance() {
     const loadingEl = document.getElementById('loadingSheet');
     const theadEl = document.getElementById('theadGAS');
@@ -116,24 +207,18 @@ async function fetchGoogleSheetAttendance() {
             return;
         }
 
-        // Header Tabel
         const headers = rows[0];
         let headerHTML = '<tr>';
-        headers.forEach(header => {
-            headerHTML += `<th>${header}</th>`;
-        });
+        headers.forEach(header => { headerHTML += `<th>${header}</th>`; });
         headerHTML += '</tr>';
         theadEl.innerHTML = headerHTML;
 
-        // Baris Data Tabel
         for (let i = 1; i < rows.length; i++) {
             const rowData = rows[i];
             if (rowData.length <= 1 && rowData[0] === '') continue;
 
             let rowHTML = '<tr>';
-            rowData.forEach(cell => {
-                rowHTML += `<td>${cell}</td>`;
-            });
+            rowData.forEach(cell => { rowHTML += `<td>${cell}</td>`; });
             rowHTML += '</tr>';
             tbodyEl.innerHTML += rowHTML;
         }
@@ -142,13 +227,13 @@ async function fetchGoogleSheetAttendance() {
     } catch (error) {
         console.error('Gagal mengambil data dari Google Sheets:', error);
         showToast('Gagal memuat spreadsheet.', 'error');
-        tbodyEl.innerHTML = '<tr><td colspan="10" style="text-align:center; color:red;">Gagal memuat data. Pastikan Google Sheets sudah dipublikasikan ke web sebagai format CSV.</td></tr>';
+        tbodyEl.innerHTML = '<tr><td colspan="10" style="text-align:center; color:red;">Gagal memuat data. Pastikan Google Sheets dipublikasikan sebagai CSV.</td></tr>';
     } finally {
         if (loadingEl) loadingEl.classList.add('hidden');
     }
 }
 
-/* KATA SAMBUTAN & JAM REALTIME */
+// --- KATA SAMBUTAN & JAM REALTIME ---
 function startRealtimeClock() {
     if (clockInterval) clearInterval(clockInterval);
 
@@ -180,68 +265,9 @@ function startRealtimeClock() {
     clockInterval = setInterval(updateClock, 1000);
 }
 
-function handleLogin(e) {
-    e.preventDefault();
-    const uInput = document.getElementById('loginUser').value.trim();
-    const pInput = document.getElementById('loginPass').value.trim();
-    const rInput = document.getElementById('loginRole').value;
-
-    const userObj = usersList[uInput];
-
-    if (userObj && userObj.pass === pInput && userObj.role === rInput) {
-        currentUser = { username: uInput, ...userObj };
-        document.getElementById('loginPage').classList.add('hidden');
-        document.getElementById('mainApp').classList.remove('hidden');
-
-        document.getElementById('userNameDisplay').innerText = currentUser.name;
-        document.getElementById('userRoleBadge').innerText = currentUser.role.replace('_', ' ');
-        document.getElementById('userAvatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.avatar}`;
-
-        applyRolePermissions(currentUser.role);
-        startRealtimeClock();
-        renderNotifications();
-        renderAllData();
-        showToast(`Selamat datang kembali!`);
-    } else {
-        showToast('Kredensial atau Role tidak sesuai!', 'error');
-    }
-}
-
-function handleLogout() {
-    currentUser = null;
-    if (clockInterval) clearInterval(clockInterval);
-    document.getElementById('mainApp').classList.add('hidden');
-    document.getElementById('loginPage').classList.remove('hidden');
-}
-
-function applyRolePermissions(role) {
-    document.querySelectorAll('.sidebar-menu li').forEach(el => {
-        const isAllowed = Array.from(el.classList).some(c => c === `role-${role}` || c === 'menu-divider');
-        el.classList.toggle('hidden', !isAllowed);
-    });
-
-    switchTab('dashboard');
-}
-
-function switchTab(tabName, event) {
-    if (event) event.preventDefault();
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-    document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
-
-    const sectionEl = document.getElementById(`section-${tabName}`);
-    if (sectionEl) sectionEl.classList.remove('hidden');
-    if (event && event.target) event.target.classList.add('active');
-
-    if (tabName === 'manajemen-hr') renderEmployees();
-    if (tabName === 'absensi') renderAbsensi();
-    if (tabName === 'manajemen-user') renderUsers();
-    if (tabName === 'manajemen-pembelajaran') renderPembelajaran();
-    if (tabName === 'dashboard') renderDashboardAcademic();
-    if (tabName === 'rekap-absensi-gas') fetchGoogleSheetAttendance();
-}
-
 function toggleNotifDropdown() {
-    document.getElementById('notifDropdown').classList.toggle('hidden');
+    const notifDropdown = document.getElementById('notifDropdown');
+    if (notifDropdown) notifDropdown.classList.toggle('hidden');
 }
 
 function renderNotifications() {
@@ -250,6 +276,8 @@ function renderNotifications() {
     const notifCount = document.getElementById('notifCount');
     const notifRoleTag = document.getElementById('notifRoleTag');
 
+    if (!notifList || !notifCount || !notifRoleTag) return;
+
     notifRoleTag.innerText = currentUser.role.toUpperCase();
     notifList.innerHTML = '';
 
@@ -257,18 +285,15 @@ function renderNotifications() {
     if (currentUser.role === 'admin') {
         items = [
             { text: `Modul HR Aktif: ${employeesList.length} karyawan terdaftar.`, time: 'Baru saja' },
-            { text: 'Sistem EduCore v2.5 berjalan lancar.', time: '10 menit lalu' },
-            { text: 'Laporan penggajian siap ditinjau.', time: '1 jam lalu' }
+            { text: 'Sistem EduCore v2.5 berjalan lancar.', time: '10 menit lalu' }
         ];
     } else if (currentUser.role === 'guru_tk') {
         items = [
-            { text: 'Pengingat: Input nilai perkembangan motorik TK.', time: '30 menit lalu' },
-            { text: 'Silakan cek absensi murid TK A & B.', time: '2 jam lalu' }
+            { text: 'Pengingat: Input nilai perkembangan motorik TK.', time: '30 menit lalu' }
         ];
     } else if (currentUser.role === 'guru_sd') {
         items = [
-            { text: 'Jadwal penilaian evaluasi SD telah dibuka.', time: '15 menit lalu' },
-            { text: 'Cek kelengkapan absensi kelas SD.', time: '3 jam lalu' }
+            { text: 'Jadwal penilaian evaluasi SD telah dibuka.', time: '15 menit lalu' }
         ];
     }
 
@@ -291,7 +316,7 @@ function renderAllData() {
     renderDashboardAcademic();
 }
 
-/* MODUL HR (ADMIN ONLY) */
+/* MODUL HR */
 function filterEmployeeTable(query) {
     const q = query.toLowerCase();
     const filtered = employeesList.filter(e => 
@@ -321,8 +346,8 @@ function renderEmployees(list = employeesList) {
     });
 }
 
-function openModalHR() { document.getElementById('modalHR').classList.remove('hidden'); }
-function closeModalHR() { document.getElementById('modalHR').classList.add('hidden'); document.getElementById('formHR').reset(); }
+function openModalHR() { const modal = document.getElementById('modalHR'); if (modal) modal.classList.remove('hidden'); }
+function closeModalHR() { const modal = document.getElementById('modalHR'); if (modal) { modal.classList.add('hidden'); document.getElementById('formHR').reset(); } }
 
 function saveEmployee(e) {
     e.preventDefault();
@@ -357,7 +382,7 @@ function deleteEmployee(nip) {
     }
 }
 
-/* SEARCH MURID */
+/* SISWA */
 function filterSiswaTable(tingkat, query) {
     const q = query.toLowerCase();
     const filtered = dataSiswa.filter(s => 
@@ -425,56 +450,65 @@ function closeModalStudentProfile() {
     document.getElementById('modalStudentProfile').classList.add('hidden');
 }
 
-/* DASHBOARD AKADEMIK & TREND CHART */
+/* DASHBOARD AKADEMIK */
 function renderDashboardAcademic() {
     if (!currentUser) return;
 
     const role = currentUser.role;
-    document.getElementById('dashRoleTitle').innerText = role === 'admin' ? 'Administrator' : (role === 'guru_tk' ? 'Guru TK' : 'Guru SD');
+    const dashRoleTitle = document.getElementById('dashRoleTitle');
+    if (dashRoleTitle) dashRoleTitle.innerText = role === 'admin' ? 'Administrator' : (role === 'guru_tk' ? 'Guru TK' : 'Guru SD');
 
     const filteredMapel = role === 'admin' ? dataMapel : dataMapel.filter(m => m.role === role);
     const filteredNilai = role === 'admin' ? dataNilai : dataNilai.filter(n => n.role === role);
 
-    document.getElementById('dashTotalMapel').innerText = filteredMapel.length;
-    document.getElementById('dashTotalNilai').innerText = filteredNilai.length;
+    const totalMapelEl = document.getElementById('dashTotalMapel');
+    const totalNilaiEl = document.getElementById('dashTotalNilai');
+
+    if (totalMapelEl) totalMapelEl.innerText = filteredMapel.length;
+    if (totalNilaiEl) totalNilaiEl.innerText = filteredNilai.length;
 
     const trendCard = document.getElementById('attendanceTrendCard');
-    if (role === 'admin') {
-        trendCard.classList.add('hidden');
-    } else {
-        trendCard.classList.remove('hidden');
-        renderAttendanceChart();
+    if (trendCard) {
+        if (role === 'admin') {
+            trendCard.classList.add('hidden');
+        } else {
+            trendCard.classList.remove('hidden');
+            renderAttendanceChart();
+        }
     }
 
     const mapelListEl = document.getElementById('dashMapelList');
-    mapelListEl.innerHTML = '';
-    filteredMapel.forEach(m => {
-        mapelListEl.innerHTML += `
-            <div class="schedule-item">
-                <span class="badge-time">${m.kode}</span>
-                <div class="sched-info">
-                    <strong>${m.nama}</strong>
+    if (mapelListEl) {
+        mapelListEl.innerHTML = '';
+        filteredMapel.forEach(m => {
+            mapelListEl.innerHTML += `
+                <div class="schedule-item">
+                    <span class="badge-time">${m.kode}</span>
+                    <div class="sched-info">
+                        <strong>${m.nama}</strong>
+                    </div>
                 </div>
-            </div>
-        `;
-    });
+            `;
+        });
+    }
 
     const tbodyNilaiDash = document.getElementById('dashTbodyNilai');
-    tbodyNilaiDash.innerHTML = '';
+    if (tbodyNilaiDash) {
+        tbodyNilaiDash.innerHTML = '';
+        filteredNilai.forEach(n => {
+            const sObj = dataSiswa.find(s => s.nis === n.nis);
+            const mObj = dataMapel.find(m => m.kode === n.mapelKode);
 
-    filteredNilai.forEach(n => {
-        const sObj = dataSiswa.find(s => s.nis === n.nis);
-        const mObj = dataMapel.find(m => m.kode === n.mapelKode);
-
-        tbodyNilaiDash.innerHTML += `
-            <tr>
-                <td><a class="student-link" onclick="openModalStudentProfile('${n.nis}')">${sObj ? sObj.nama : n.nis}</a></td>
-                <td>${mObj ? mObj.nama : n.mapelKode}</td>
-                <td><span class="badge-role">${n.nilai}</span></td>
-                <td><small>${n.catatan}</small></td>
-            </tr>
-        `;
-    });
+            tbodyNilaiDash.innerHTML += `
+                <tr>
+                    <td><a class="student-link" onclick="openModalStudentProfile('${n.nis}')">${sObj ? sObj.nama : n.nis}</a></td>
+                    <td>${mObj ? mObj.nama : n.mapelKode}</td>
+                    <td><span class="badge-role">${n.nilai}</span></td>
+                    <td><small>${n.catatan}</small></td>
+                </tr>
+            `;
+        });
+    }
 }
 
 function renderAttendanceChart() {
@@ -543,8 +577,8 @@ function renderPembelajaran() {
     }
 }
 
-function openModalMapel() { document.getElementById('modalMapel').classList.remove('hidden'); }
-function closeModalMapel() { document.getElementById('modalMapel').classList.add('hidden'); document.getElementById('formMapel').reset(); }
+function openModalMapel() { const m = document.getElementById('modalMapel'); if(m) m.classList.remove('hidden'); }
+function closeModalMapel() { const m = document.getElementById('modalMapel'); if(m) { m.classList.add('hidden'); document.getElementById('formMapel').reset(); } }
 
 function saveMapel(e) {
     e.preventDefault();
@@ -563,6 +597,7 @@ function saveMapel(e) {
 function openModalNilai() {
     const sSelect = document.getElementById('nilaiSiswaSelect');
     const mSelect = document.getElementById('nilaiMapelSelect');
+    if (!sSelect || !mSelect) return;
     sSelect.innerHTML = ''; mSelect.innerHTML = '';
 
     const role = currentUser.role;
@@ -574,7 +609,7 @@ function openModalNilai() {
 
     document.getElementById('modalNilai').classList.remove('hidden');
 }
-function closeModalNilai() { document.getElementById('modalNilai').classList.add('hidden'); document.getElementById('formNilai').reset(); }
+function closeModalNilai() { const m = document.getElementById('modalNilai'); if(m) { m.classList.add('hidden'); document.getElementById('formNilai').reset(); } }
 
 function saveNilai(e) {
     e.preventDefault();
@@ -605,8 +640,10 @@ function deleteNilai(id) {
 
 function renderAbsensi() {
     const tbody = document.getElementById('tbodyAbsensi');
-    const selectedDate = document.getElementById('filterTanggalAbsensi').value;
-    if (!tbody) return;
+    const selectedDateEl = document.getElementById('filterTanggalAbsensi');
+    if (!tbody || !selectedDateEl) return;
+    
+    const selectedDate = selectedDateEl.value;
     tbody.innerHTML = '';
 
     if (!absensiRecords[selectedDate]) absensiRecords[selectedDate] = {};
@@ -643,47 +680,6 @@ function updateAbsensi(date, nis, status) {
     showToast('Absensi diperbarui.');
 }
 
-function downloadAbsensiPDF() {
-    const selectedDate = document.getElementById('filterTanggalAbsensi').value;
-    const pdfTbody = document.getElementById('pdfTbodyAbsensi');
-    pdfTbody.innerHTML = '';
-
-    let filteredSiswa = (currentUser.role === 'guru_tk') 
-        ? dataSiswa.filter(s => s.tingkat === 'TK') 
-        : dataSiswa.filter(s => s.tingkat === 'SD');
-
-    document.getElementById('pdfTanggal').innerText = selectedDate;
-    document.getElementById('pdfGuru').innerText = currentUser.name;
-    document.getElementById('pdfNamaGuruSign').innerText = currentUser.name;
-
-    filteredSiswa.forEach((s, idx) => {
-        const status = (absensiRecords[selectedDate] && absensiRecords[selectedDate][s.nis]) ? absensiRecords[selectedDate][s.nis] : 'Hadir';
-        pdfTbody.innerHTML += `
-            <tr>
-                <td style="text-align:center;">${idx + 1}</td>
-                <td>${s.nis}</td>
-                <td><b>${s.nama}</b></td>
-                <td>${s.kelas}</td>
-                <td style="text-align:center;"><b>${status}</b></td>
-            </tr>
-        `;
-    });
-
-    const element = document.getElementById('pdfExportContainer');
-
-    html2canvas(element, { scale: 2 }).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const imgWidth = 210;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-        pdf.save(`Laporan_Absensi_${selectedDate}.pdf`);
-        showToast('PDF Laporan berhasil dibuat!');
-    });
-}
-
 function renderUsers() {
     const tbody = document.getElementById('tbodyUsers');
     if (!tbody) return;
@@ -706,8 +702,8 @@ function renderUsers() {
     });
 }
 
-function openModalUser() { document.getElementById('modalUser').classList.remove('hidden'); }
-function closeModalUser() { document.getElementById('modalUser').classList.add('hidden'); document.getElementById('formUser').reset(); }
+function openModalUser() { const m = document.getElementById('modalUser'); if(m) m.classList.remove('hidden'); }
+function closeModalUser() { const m = document.getElementById('modalUser'); if(m) { m.classList.add('hidden'); document.getElementById('formUser').reset(); } }
 
 function saveUser(e) {
     e.preventDefault();
@@ -745,7 +741,7 @@ function openModalSiswa(tingkat) {
     document.getElementById('modalSiswaTitle').innerText = `Tambah Murid Baru (${tingkat})`;
     document.getElementById('modalSiswa').classList.remove('hidden');
 }
-function closeModalSiswa() { document.getElementById('modalSiswa').classList.add('hidden'); document.getElementById('formSiswa').reset(); }
+function closeModalSiswa() { const m = document.getElementById('modalSiswa'); if(m) { m.classList.add('hidden'); document.getElementById('formSiswa').reset(); } }
 
 function saveSiswa(e) {
     e.preventDefault();
