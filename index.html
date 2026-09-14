@@ -6,7 +6,6 @@
     <title>EduCore - Management System</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <!-- CDN html2canvas & jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
@@ -18,7 +17,7 @@
     <div id="loginPage" class="auth-wrapper">
         <div class="auth-card glass-panel fade-in-up">
             <div class="brand-logo">
-                <div class="logo-icon">E</div>
+                <img src="https://lh3.googleusercontent.com/d/1d01Ip9TgSPTBK3FjfvL4vxwJSS9ig3Wd" class="app-logo" alt="Logo Sekolah">
                 <h2>EduCore <span>SMS</span></h2>
             </div>
             <p class="auth-subtitle">Sistem Informasi Manajemen Sekolah</p>
@@ -51,7 +50,7 @@
         <!-- Sidebar Navigation -->
         <aside class="sidebar">
             <div class="sidebar-brand">
-                <div class="logo-icon small">E</div>
+                <img src="https://lh3.googleusercontent.com/d/1d01Ip9TgSPTBK3FjfvL4vxwJSS9ig3Wd" class="app-logo small" alt="Logo Sekolah">
                 <h2>EduCore</h2>
             </div>
 
@@ -67,9 +66,10 @@
                 <ul>
                     <li class="role-admin role-guru_tk role-guru_sd"><a href="#" class="nav-link active" onclick="switchTab('dashboard', event)">⚡ Dashboard</a></li>
                     
-                    <!-- PENGATURAN SISTEM (Akses: Admin, Guru TK, Guru SD) -->
+                    <!-- PENGATURAN SISTEM & MANAJEMEN AKADEMIK -->
                     <li class="menu-divider role-admin role-guru_tk role-guru_sd">PENGATURAN SISTEM</li>
-                    <li class="role-admin role-guru_tk role-guru_sd"><a href="#" class="nav-link" onclick="switchTab('manajemen-user', event)">🔐 Manajemen Pengguna</a></li>
+                    <li class="role-admin"><a href="#" class="nav-link" onclick="switchTab('manajemen-user', event)">🔐 Manajemen Pengguna (Akun)</a></li>
+                    <li class="role-guru_tk role-guru_sd"><a href="#" class="nav-link" onclick="switchTab('manajemen-pembelajaran', event)">📚 Kelola Mapel & Nilai Siswa</a></li>
 
                     <!-- LAYANAN TK -->
                     <li class="menu-divider role-admin role-guru_tk">LAYANAN TK</li>
@@ -82,7 +82,6 @@
                     <!-- KEGIATAN HARIAN -->
                     <li class="menu-divider role-admin role-guru_tk role-guru_sd">KEGIATAN HARIAN</li>
                     <li class="role-admin role-guru_tk role-guru_sd"><a href="#" class="nav-link" onclick="switchTab('absensi', event)">📅 Absensi Siswa</a></li>
-                    <li class="role-admin role-guru_tk role-guru_sd"><a href="#" class="nav-link" onclick="switchTab('buku-kerja', event)">📑 Buku Kerja Digital</a></li>
                 </ul>
             </nav>
 
@@ -92,97 +91,124 @@
         <!-- Main Content Area -->
         <main class="content">
             
-            <!-- DASHBOARD GURU & ADMIN MODERN -->
+            <!-- DASHBOARD GURU & ADMIN -->
             <div id="section-dashboard" class="tab-content fade-in-up">
                 <header class="page-header">
                     <div>
-                        <span class="breadcrumb">Manajemen Kelas ❯ <b>Daftar Hadir & Jadwal</b></span>
+                        <span class="breadcrumb">Manajemen Kelas ❯ <b>Ringkasan Akademik</b></span>
                         <h1 style="margin-top: 4px;">Dashboard Pengampu</h1>
                     </div>
                 </header>
 
                 <div class="dashboard-grid-layout">
-                    <!-- Kolom Kiri: Kalender Ringkas & Jadwal Hari Ini -->
+                    <!-- Kolom Kiri -->
                     <div class="dash-left-col">
                         <div class="card p-4">
                             <div class="calendar-mini-header">
-                                <strong>Juni 2026</strong>
-                                <div class="cal-nav">‹ ›</div>
+                                <strong>September 2026</strong>
                             </div>
                             <div class="days-row">
-                                <div><span>Sen</span><b>10</b></div>
-                                <div><span>Sel</span><b>11</b></div>
-                                <div><span>Rab</span><b>12</b></div>
-                                <div><span>Kam</span><b>13</b></div>
-                                <div class="active-day"><span>Jum</span><b>14</b></div>
-                                <div><span>Sab</span><b>15</b></div>
-                                <div><span>Min</span><b>16</b></div>
+                                <div><span>Sen</span><b>14</b></div>
+                                <div><span>Sel</span><b>15</b></div>
+                                <div><span>Rab</span><b>16</b></div>
+                                <div><span>Kam</span><b>17</b></div>
+                                <div class="active-day"><span>Jum</span><b>18</b></div>
+                                <div><span>Sab</span><b>19</b></div>
                             </div>
                         </div>
 
                         <div class="card p-4 style-schedule">
-                            <h4>Jadwal Saya Hari Ini</h4>
-                            <div class="schedule-item">
-                                <span class="badge-time">2nd</span>
-                                <div class="sched-info">
-                                    <strong>Bahasa Indonesia</strong>
-                                    <small>Kelas 1A / Kelompok B</small>
-                                </div>
-                            </div>
-                            <div class="schedule-item">
-                                <span class="badge-time">3rd</span>
-                                <div class="sched-info">
-                                    <strong>Tematik Integrasi</strong>
-                                    <small>Kelas 1A / Kelompok B</small>
-                                </div>
-                            </div>
+                            <h4>Mata Pelajaran Aktif</h4>
+                            <div id="dashMapelList" class="mt-2"></div>
                         </div>
                     </div>
 
-                    <!-- Kolom Kanan: Stats Ringkas Absensi -->
+                    <!-- Kolom Kanan -->
                     <div class="dash-right-col">
                         <div class="card-row">
                             <div class="card stat-box blue-border">
-                                <small>Kelas Wali</small>
-                                <h2>1A / TK B</h2>
+                                <small>Role Login</small>
+                                <h3 id="dashRoleTitle" class="text-blue">-</h3>
                             </div>
                             <div class="card stat-box green-border">
-                                <small>% Kehadiran Hari Ini</small>
-                                <h1 class="text-blue">100.0 %</h1>
+                                <small>Total Mapel</small>
+                                <h1 class="text-blue" id="dashTotalMapel">0</h1>
                             </div>
                             <div class="card stat-box green-light-border">
-                                <small>Total Siswa Hadir</small>
-                                <h1 class="text-green" id="dashTotalHadir">0</h1>
+                                <small>Data Nilai Terinput</small>
+                                <h1 class="text-green" id="dashTotalNilai">0</h1>
                             </div>
                         </div>
 
                         <div class="card p-4 mt-4">
-                            <h4>Daftar Hadir Ringkas - Hari Ini</h4>
-                            <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 12px;">Gunakan menu Absensi Siswa untuk melakukan rekap lengkap & download PDF.</p>
-                            <div id="quickAbsensiPreview"></div>
+                            <h4>Ringkasan Nilai Siswa Terbaru</h4>
+                            <div class="table-responsive mt-2">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Siswa</th>
+                                            <th>Mata Pelajaran</th>
+                                            <th>Nilai / Capaian</th>
+                                            <th>Catatan Guru</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="dashTbodyNilai"></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- MANAJEMEN PENGGUNA (ADMIN, GURU TK, GURU SD) -->
+            <!-- MANAJEMEN PEMBELAJARAN (KHUSUS GURU TK & SD) -->
+            <div id="section-manajemen-pembelajaran" class="tab-content hidden fade-in-up">
+                <header class="page-header">
+                    <div>
+                        <h1>Kelola Mata Pelajaran & Nilai</h1>
+                        <p>Atur kurikulum mapel dan input penilaian siswa yang akan tampil di dashboard.</p>
+                    </div>
+                    <div style="display:flex; gap: 10px;">
+                        <button class="btn btn-secondary" onclick="openModalMapel()">+ Tambah Mapel</button>
+                        <button class="btn btn-primary" onclick="openModalNilai()">+ Input Nilai Siswa</button>
+                    </div>
+                </header>
+
+                <div class="grid-2-col">
+                    <div class="card p-4">
+                        <h3>Daftar Mata Pelajaran / Kegiatan</h3>
+                        <table class="mt-2">
+                            <thead>
+                                <tr><th>Kode</th><th>Nama Mata Pelajaran</th><th>Pengampu</th></tr>
+                            </thead>
+                            <tbody id="tbodyMapel"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="card p-4">
+                        <h3>Daftar Evaluasi Nilai Siswa</h3>
+                        <table class="mt-2">
+                            <thead>
+                                <tr><th>Siswa</th><th>Mapel</th><th>Nilai</th><th>Aksi</th></tr>
+                            </thead>
+                            <tbody id="tbodyNilai"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MANAJEMEN USER (ADMIN ONLY) -->
             <div id="section-manajemen-user" class="tab-content hidden fade-in-up">
                 <header class="page-header">
                     <div>
                         <h1>Manajemen Pengguna Portal</h1>
-                        <p>Kelola hak akses dan akun login pengguna portal sekolah.</p>
+                        <p>Kelola akun dan password login staff dan guru.</p>
                     </div>
-                    <button class="btn btn-primary" onclick="openModalUser()">+ Tambah Pengguna Baru</button>
+                    <button class="btn btn-primary" onclick="openModalUser()">+ Tambah User</button>
                 </header>
                 <div class="card table-card">
                     <table>
                         <thead>
-                            <tr>
-                                <th>Username</th>
-                                <th>Nama Lengkap</th>
-                                <th>Role / Akses</th>
-                                <th>Aksi</th>
-                            </tr>
+                            <tr><th>Username</th><th>Nama Lengkap</th><th>Role</th><th>Aksi</th></tr>
                         </thead>
                         <tbody id="tbodyUsers"></tbody>
                     </table>
@@ -194,14 +220,14 @@
                 <header class="page-header">
                     <div>
                         <h1>Data Murid TK</h1>
-                        <p>Daftar peserta didik tingkat Taman Kanak-Kanak.</p>
+                        <p>Daftar peserta didik TK.</p>
                     </div>
                     <button class="btn btn-primary" onclick="openModalSiswa('TK')">+ Tambah Murid TK</button>
                 </header>
                 <div class="card table-card">
                     <table>
                         <thead>
-                            <tr><th>NIS</th><th>Nama Siswa</th><th>Kelompok</th><th>Orang Tua</th><th>Kontak HP</th><th>Aksi</th></tr>
+                            <tr><th>NIS</th><th>Nama Siswa</th><th>Kelompok</th><th>Orang Tua</th><th>HP</th><th>Aksi</th></tr>
                         </thead>
                         <tbody id="tbodySiswaTK"></tbody>
                     </table>
@@ -213,71 +239,39 @@
                 <header class="page-header">
                     <div>
                         <h1>Data Murid SD</h1>
-                        <p>Daftar peserta didik Sekolah Dasar.</p>
+                        <p>Daftar peserta didik SD.</p>
                     </div>
                     <button class="btn btn-primary" onclick="openModalSiswa('SD')">+ Tambah Murid SD</button>
                 </header>
                 <div class="card table-card">
                     <table>
                         <thead>
-                            <tr><th>NISN</th><th>Nama Siswa</th><th>Kelas</th><th>Orang Tua</th><th>Kontak HP</th><th>Aksi</th></tr>
+                            <tr><th>NISN</th><th>Nama Siswa</th><th>Kelas</th><th>Orang Tua</th><th>HP</th><th>Aksi</th></tr>
                         </thead>
                         <tbody id="tbodySiswaSD"></tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- FITUR ABSENSI SISWA & CETAK PDF -->
+            <!-- ABSENSI SISWA -->
             <div id="section-absensi" class="tab-content hidden fade-in-up">
                 <header class="page-header">
                     <div>
                         <h1>Absensi Siswa Harian</h1>
-                        <p id="absensiSubtitle">Pencatatan kehadiran murid harian.</p>
+                        <p>Pencatatan kehadiran murid harian.</p>
                     </div>
                     <div class="filter-absensi-wrapper">
                         <input type="date" id="filterTanggalAbsensi" onchange="renderAbsensi()" class="input-date">
-                        <button id="btnDownloadPDF" class="btn btn-success" onclick="downloadAbsensiPDF()">📄 Unduh Laporan PDF</button>
+                        <button class="btn btn-success" onclick="downloadAbsensiPDF()">📄 Unduh Laporan PDF</button>
                     </div>
                 </header>
 
                 <div class="card table-card">
                     <table>
                         <thead>
-                            <tr>
-                                <th>NIS / NISN</th>
-                                <th>Nama Siswa</th>
-                                <th>Tingkat</th>
-                                <th>Kelas / Kelompok</th>
-                                <th>Status Kehadiran</th>
-                            </tr>
+                            <tr><th>NIS / NISN</th><th>Nama Siswa</th><th>Tingkat</th><th>Kelas</th><th>Status Kehadiran</th></tr>
                         </thead>
                         <tbody id="tbodyAbsensi"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- BUKU KERJA GURU -->
-            <div id="section-buku-kerja" class="tab-content hidden fade-in-up">
-                <header class="page-header">
-                    <div>
-                        <h1>Buku Kerja Digital Guru</h1>
-                        <p>Administrasi pengajaran terintegrasi.</p>
-                    </div>
-                    <button class="btn btn-primary" onclick="openModalBukuKerja()">+ Dokumen Baru</button>
-                </header>
-
-                <div class="card table-card">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Jenis Template</th>
-                                <th>Mata Pelajaran / Kelas</th>
-                                <th>Tanggal Submit</th>
-                                <th>Status Validasi</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbodyBukuKerja"></tbody>
                     </table>
                 </div>
             </div>
@@ -285,10 +279,10 @@
         </main>
     </div>
 
-    <!-- KOP SURAT PRINT FORMAT PDF (YAYASAN PENDIDIKAN NASIONAL MELBOURNE) -->
+    <!-- KOP SURAT PRINT FORMAT PDF WITH CUSTOM LOGO -->
     <div id="pdfExportContainer" class="pdf-container">
         <div class="kop-surat">
-            <div class="kop-logo">E</div>
+            <img src="https://lh3.googleusercontent.com/d/1d01Ip9TgSPTBK3FjfvL4vxwJSS9ig3Wd" class="kop-logo-img" alt="Logo Kop">
             <div class="kop-text">
                 <h2>YAYASAN PENDIDIKAN NASIONAL MELBOURNE</h2>
                 <h3>SEKOLAH TK & SD EDUCORE SCHOOL</h3>
@@ -307,13 +301,7 @@
 
             <table class="pdf-table">
                 <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>NIS / NISN</th>
-                        <th>Nama Siswa</th>
-                        <th>Kelas / Kelompok</th>
-                        <th>Status Kehadiran</th>
-                    </tr>
+                    <tr><th>No</th><th>NIS / NISN</th><th>Nama Siswa</th><th>Kelas</th><th>Status Kehadiran</th></tr>
                 </thead>
                 <tbody id="pdfTbodyAbsensi"></tbody>
             </table>
@@ -334,28 +322,69 @@
         </div>
     </div>
 
-    <!-- MODAL USER -->
+    <!-- MODAL MAPEL -->
+    <div id="modalMapel" class="modal-backdrop hidden">
+        <div class="modal-card slide-up">
+            <h2>Tambah Mata Pelajaran</h2>
+            <form id="formMapel" onsubmit="saveMapel(event)">
+                <div class="form-group">
+                    <label>Kode Mapel</label>
+                    <input type="text" id="mapelKode" placeholder="Contoh: SD-BIO / TK-MNE" required>
+                </div>
+                <div class="form-group">
+                    <label>Nama Mata Pelajaran / Kegiatan</label>
+                    <input type="text" id="mapelNama" placeholder="Contoh: Tematik / Motorik Halus" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModalMapel()">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Mapel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL INPUT NILAI -->
+    <div id="modalNilai" class="modal-backdrop hidden">
+        <div class="modal-card slide-up">
+            <h2>Input Nilai Siswa</h2>
+            <form id="formNilai" onsubmit="saveNilai(event)">
+                <div class="form-group">
+                    <label>Pilih Siswa</label>
+                    <select id="nilaiSiswaSelect" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Pilih Mata Pelajaran</label>
+                    <select id="nilaiMapelSelect" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Nilai / Capaian (TK: BSB/BSH/MB, SD: 0-100)</label>
+                    <input type="text" id="nilaiAngka" placeholder="Contoh: 88 atau BSB" required>
+                </div>
+                <div class="form-group">
+                    <label>Catatan Perkembangan / Evaluasi</label>
+                    <input type="text" id="nilaiCatatan" placeholder="Sangat aktif dan memahami materi" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModalNilai()">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Nilai</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL USER (ADMIN) -->
     <div id="modalUser" class="modal-backdrop hidden">
         <div class="modal-card slide-up">
-            <h2>Tambah Pengguna Portal Baru</h2>
+            <h2>Tambah Pengguna Baru</h2>
             <form id="formUser" onsubmit="saveUser(event)">
                 <div class="form-group-grid">
+                    <div><label>Username</label><input type="text" id="userInputUsername" required></div>
+                    <div><label>Password</label><input type="password" id="userInputPassword" required></div>
+                    <div><label>Nama Lengkap</label><input type="text" id="userInputNama" required></div>
                     <div>
-                        <label>Username</label>
-                        <input type="text" id="userInputUsername" required>
-                    </div>
-                    <div>
-                        <label>Password</label>
-                        <input type="password" id="userInputPassword" required>
-                    </div>
-                    <div>
-                        <label>Nama Lengkap</label>
-                        <input type="text" id="userInputNama" required>
-                    </div>
-                    <div>
-                        <label>Role Akses</label>
+                        <label>Role</label>
                         <select id="userInputRole" required>
-                            <option value="admin">Admin / Staff Sekolah</option>
+                            <option value="admin">Admin</option>
                             <option value="guru_tk">Guru TK</option>
                             <option value="guru_sd">Guru SD</option>
                         </select>
@@ -376,57 +405,15 @@
             <form id="formSiswa" onsubmit="saveSiswa(event)">
                 <input type="hidden" id="siswaTingkat">
                 <div class="form-group-grid">
-                    <div>
-                        <label>NIS / NISN</label>
-                        <input type="text" id="siswaNis" required>
-                    </div>
-                    <div>
-                        <label>Nama Lengkap</label>
-                        <input type="text" id="siswaNama" required>
-                    </div>
-                    <div>
-                        <label>Kelas / Kelompok</label>
-                        <input type="text" id="siswaKelas" placeholder="Misal: TK A / SD Kelas 1" required>
-                    </div>
-                    <div>
-                        <label>Nama Orang Tua</label>
-                        <input type="text" id="siswaOrtu" required>
-                    </div>
-                    <div class="full-width">
-                        <label>No. HP Orang Tua</label>
-                        <input type="text" id="siswaHp" placeholder="08xxxxxxxxxx" required>
-                    </div>
+                    <div><label>NIS / NISN</label><input type="text" id="siswaNis" required></div>
+                    <div><label>Nama Lengkap</label><input type="text" id="siswaNama" required></div>
+                    <div><label>Kelas / Kelompok</label><input type="text" id="siswaKelas" placeholder="TK A / SD Kelas 1" required></div>
+                    <div><label>Nama Orang Tua</label><input type="text" id="siswaOrtu" required></div>
+                    <div class="full-width"><label>No. HP</label><input type="text" id="siswaHp" required></div>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModalSiswa()">Batal</button>
                     <button type="submit" class="btn btn-primary">Simpan Siswa</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL BUKU KERJA -->
-    <div id="modalBukuKerja" class="modal-backdrop hidden">
-        <div class="modal-card slide-up">
-            <h2>Form Buku Kerja Guru</h2>
-            <form id="formBukuKerja" onsubmit="saveBukuKerja(event)">
-                <div class="form-group-grid">
-                    <div>
-                        <label>Template Dokumen</label>
-                        <select id="docTemplate" required>
-                            <option value="RPP / Modul Ajar">RPP / Modul Ajar</option>
-                            <option value="Program Tahunan (PROTA)">Program Tahunan (PROTA)</option>
-                            <option value="Program Semester (PROMES)">Program Semester (PROMES)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>Mata Pelajaran / Kelas</label>
-                        <input type="text" id="docMapel" required>
-                    </div>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModalBukuKerja()">Batal</button>
-                    <button type="submit" class="btn btn-primary">Submit Dokumen</button>
                 </div>
             </form>
         </div>
