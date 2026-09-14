@@ -4,6 +4,12 @@ const defaultUsers = {
     'gurusd': { pass: 'sd123', role: 'guru_sd', name: 'Budi Santoso, S.Pd.', avatar: 'Budi' }
 };
 
+const defaultEmployees = [
+    { nip: 'KAY-2026-001', nama: 'Budi Santoso, S.Pd.', dept: 'Guru SD', status: 'Tetap', gaji: 5000000, hp: '081234567801' },
+    { nip: 'KAY-2026-002', nama: 'Siti Rahma, S.Pd.', dept: 'Guru TK', status: 'Tetap', gaji: 4800000, hp: '081234567802' },
+    { nip: 'KAY-2026-003', nama: 'Dewi Lestari, A.Md.', dept: 'Administrasi', status: 'Kontrak', gaji: 3800000, hp: '081234567803' }
+];
+
 const defaultSiswa = [
     { nis: '101', nama: 'Ahmad Fauzi', tingkat: 'TK', kelas: 'TK B', ortu: 'Budi Fauzi', hp: '08123456781' },
     { nis: '102', nama: 'Anisa Putri', tingkat: 'TK', kelas: 'TK B', ortu: 'Hendra', hp: '08123456784' },
@@ -24,15 +30,19 @@ const defaultNilai = [
 ];
 
 let usersList = JSON.parse(localStorage.getItem('educore_users')) || defaultUsers;
+let employeesList = JSON.parse(localStorage.getItem('educore_employees')) || defaultEmployees;
 let dataSiswa = JSON.parse(localStorage.getItem('educore_siswa')) || defaultSiswa;
 let dataMapel = JSON.parse(localStorage.getItem('educore_mapel')) || defaultMapel;
 let dataNilai = JSON.parse(localStorage.getItem('educore_nilai')) || defaultNilai;
 let absensiRecords = JSON.parse(localStorage.getItem('educore_absensi')) || {};
+
 let currentUser = null;
 let attendanceChartInstance = null;
+let clockInterval = null;
 
 function saveDataToStorage() {
     localStorage.setItem('educore_users', JSON.stringify(usersList));
+    localStorage.setItem('educore_employees', JSON.stringify(employeesList));
     localStorage.setItem('educore_siswa', JSON.stringify(dataSiswa));
     localStorage.setItem('educore_mapel', JSON.stringify(dataMapel));
     localStorage.setItem('educore_nilai', JSON.stringify(dataNilai));
@@ -49,6 +59,38 @@ function showToast(msg, type = 'success') {
     toast.innerText = msg;
     toast.className = `toast ${type}`;
     setTimeout(() => toast.classList.add('hidden'), 3000);
+}
+
+/* KATA SAMBUTAN & JAM REALTIME */
+function startRealtimeClock() {
+    if (clockInterval) clearInterval(clockInterval);
+
+    function updateClock() {
+        const now = new Date();
+        const hrs = now.getHours();
+
+        let greeting = "Selamat Malam";
+        if (hrs >= 3 && hrs < 11) greeting = "Selamat Pagi";
+        else if (hrs >= 11 && hrs < 15) greeting = "Selamat Siang";
+        else if (hrs >= 15 && hrs < 18) greeting = "Selamat Sore";
+
+        const greetingTitle = document.getElementById('greetingTitle');
+        if (greetingTitle && currentUser) {
+            greetingTitle.innerText = `${greeting}, ${currentUser.name}! 👋`;
+        }
+
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const dateStr = now.toLocaleDateString('id-ID', options);
+        const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+        const realtimeClock = document.getElementById('realtimeClock');
+        if (realtimeClock) {
+            realtimeClock.innerText = `${dateStr} • Pukul ${timeStr} WIB`;
+        }
+    }
+
+    updateClock();
+    clockInterval = setInterval(updateClock, 1000);
 }
 
 function handleLogin(e) {
@@ -69,16 +111,18 @@ function handleLogin(e) {
         document.getElementById('userAvatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.avatar}`;
 
         applyRolePermissions(currentUser.role);
+        startRealtimeClock();
         renderNotifications();
         renderAllData();
-        showToast(`Selamat datang, ${currentUser.name}!`);
+        showToast(`Selamat datang kembali!`);
     } else {
-        showToast('Kredensial atau Role tidak valid!', 'error');
+        showToast('Kredensial atau Role tidak sesuai!', 'error');
     }
 }
 
 function handleLogout() {
     currentUser = null;
+    if (clockInterval) clearInterval(clockInterval);
     document.getElementById('mainApp').classList.add('hidden');
     document.getElementById('loginPage').classList.remove('hidden');
 }
@@ -100,13 +144,13 @@ function switchTab(tabName, event) {
     document.getElementById(`section-${tabName}`).classList.remove('hidden');
     if (event) event.target.classList.add('active');
 
+    if (tabName === 'manajemen-hr') renderEmployees();
     if (tabName === 'absensi') renderAbsensi();
     if (tabName === 'manajemen-user') renderUsers();
     if (tabName === 'manajemen-pembelajaran') renderPembelajaran();
     if (tabName === 'dashboard') renderDashboardAcademic();
 }
 
-/* FITUR: NOTIFICATION CENTER */
 function toggleNotifDropdown() {
     document.getElementById('notifDropdown').classList.toggle('hidden');
 }
@@ -123,19 +167,19 @@ function renderNotifications() {
     let items = [];
     if (currentUser.role === 'admin') {
         items = [
-            { text: 'Sistem EduCore diperbarui ke versi v2.4.', time: 'Baru saja' },
-            { text: `Total pengguna aktif sistem: ${Object.keys(usersList).length} Akun.`, time: '10 menit lalu' },
-            { text: 'Laporan backup basis data bulanan siap.', time: '1 jam lalu' }
+            { text: `Modul HR Aktif: ${employeesList.length} karyawan terdaftar.`, time: 'Baru saja' },
+            { text: 'Sistem EduCore v2.5 berjalan lancar.', time: '10 menit lalu' },
+            { text: 'Laporan penggajian siap ditinjau.', time: '1 jam lalu' }
         ];
     } else if (currentUser.role === 'guru_tk') {
         items = [
-            { text: 'Pengingat: Input nilai perkembangan motorik TK minggu ini.', time: '30 menit lalu' },
-            { text: '2 Murid TK memerlukan rekap absensi bulanan.', time: '2 jam lalu' }
+            { text: 'Pengingat: Input nilai perkembangan motorik TK.', time: '30 menit lalu' },
+            { text: 'Silakan cek absensi murid TK A & B.', time: '2 jam lalu' }
         ];
     } else if (currentUser.role === 'guru_sd') {
         items = [
-            { text: 'Jadwal Ulangan Harian Matematika SD telah dibuka.', time: '15 menit lalu' },
-            { text: 'Harap periksa kelengkapan nilai siswa SD Kelas 1.', time: '3 jam lalu' }
+            { text: 'Jadwal penilaian evaluasi SD telah dibuka.', time: '15 menit lalu' },
+            { text: 'Cek kelengkapan absensi kelas SD.', time: '3 jam lalu' }
         ];
     }
 
@@ -151,13 +195,80 @@ function renderNotifications() {
 }
 
 function renderAllData() {
+    renderEmployees();
     renderSiswaTables(dataSiswa);
     renderUsers();
     renderPembelajaran();
     renderDashboardAcademic();
 }
 
-/* FITUR: SEARCH MURID IN TABLES */
+/* MODUL HR (ADMIN ONLY) */
+function filterEmployeeTable(query) {
+    const q = query.toLowerCase();
+    const filtered = employeesList.filter(e => 
+        e.nama.toLowerCase().includes(q) || e.nip.toLowerCase().includes(q) || e.dept.toLowerCase().includes(q)
+    );
+    renderEmployees(filtered);
+}
+
+function renderEmployees(list = employeesList) {
+    const tbody = document.getElementById('tbodyHR');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    list.forEach(emp => {
+        const formatGaji = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(emp.gaji);
+        tbody.innerHTML += `
+            <tr>
+                <td><b>${emp.nip}</b></td>
+                <td>👤 ${emp.nama}</td>
+                <td><span class="badge-role">${emp.dept}</span></td>
+                <td>${emp.status}</td>
+                <td><b>${formatGaji}</b></td>
+                <td>${emp.hp}</td>
+                <td><button class="btn btn-danger" onclick="deleteEmployee('${emp.nip}')">Hapus</button></td>
+            </tr>
+        `;
+    });
+}
+
+function openModalHR() { document.getElementById('modalHR').classList.remove('hidden'); }
+function closeModalHR() { document.getElementById('modalHR').classList.add('hidden'); document.getElementById('formHR').reset(); }
+
+function saveEmployee(e) {
+    e.preventDefault();
+    const nip = document.getElementById('hrNip').value.trim();
+
+    if (employeesList.some(emp => emp.nip === nip)) {
+        showToast('NIP karyawan sudah terdaftar!', 'error');
+        return;
+    }
+
+    employeesList.push({
+        nip: nip,
+        nama: document.getElementById('hrNama').value.trim(),
+        dept: document.getElementById('hrDept').value,
+        status: document.getElementById('hrStatus').value,
+        gaji: parseFloat(document.getElementById('hrGaji').value) || 0,
+        hp: document.getElementById('hrHp').value.trim()
+    });
+
+    saveDataToStorage();
+    renderEmployees();
+    closeModalHR();
+    showToast('Karyawan Baru Berhasil Disimpan!');
+}
+
+function deleteEmployee(nip) {
+    if (confirm(`Hapus data karyawan NIP: ${nip}?`)) {
+        employeesList = employeesList.filter(emp => emp.nip !== nip);
+        saveDataToStorage();
+        renderEmployees();
+        showToast('Data karyawan dihapus.', 'error');
+    }
+}
+
+/* SERCH MURID */
 function filterSiswaTable(tingkat, query) {
     const q = query.toLowerCase();
     const filtered = dataSiswa.filter(s => 
@@ -188,7 +299,6 @@ function renderSiswaTables(listSiswa, specificTingkat = null) {
     });
 }
 
-/* FITUR: STUDENT PROFILE MODAL */
 function openModalStudentProfile(nis) {
     const s = dataSiswa.find(item => item.nis === nis);
     if (!s) return;
@@ -200,7 +310,6 @@ function openModalStudentProfile(nis) {
     document.getElementById('profileHp').innerText = s.hp;
     document.getElementById('profileAvatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${s.nama}`;
 
-    // Load Student Grades History
     const profileTbody = document.getElementById('profileTbodyNilai');
     profileTbody.innerHTML = '';
     const studentGrades = dataNilai.filter(n => n.nis === nis);
@@ -227,7 +336,7 @@ function closeModalStudentProfile() {
     document.getElementById('modalStudentProfile').classList.add('hidden');
 }
 
-/* DASHBOARD AKADEMIK & ATTENDANCE TREND CHART */
+/* DASHBOARD AKADEMIK & TREND CHART */
 function renderDashboardAcademic() {
     if (!currentUser) return;
 
@@ -240,7 +349,6 @@ function renderDashboardAcademic() {
     document.getElementById('dashTotalMapel').innerText = filteredMapel.length;
     document.getElementById('dashTotalNilai').innerText = filteredNilai.length;
 
-    // Show/Hide Attendance Trend Chart based on Role
     const trendCard = document.getElementById('attendanceTrendCard');
     if (role === 'admin') {
         trendCard.classList.add('hidden');
@@ -249,7 +357,6 @@ function renderDashboardAcademic() {
         renderAttendanceChart();
     }
 
-    // List Mapel Dashboard Left
     const mapelListEl = document.getElementById('dashMapelList');
     mapelListEl.innerHTML = '';
     filteredMapel.forEach(m => {
@@ -263,7 +370,6 @@ function renderDashboardAcademic() {
         `;
     });
 
-    // List Table Nilai Dashboard Right
     const tbodyNilaiDash = document.getElementById('dashTbodyNilai');
     tbodyNilaiDash.innerHTML = '';
 
@@ -282,7 +388,6 @@ function renderDashboardAcademic() {
     });
 }
 
-/* FITUR: ATTENDANCE TREND CHART (CHART.JS) */
 function renderAttendanceChart() {
     const ctx = document.getElementById('attendanceChart').getContext('2d');
     
@@ -314,7 +419,6 @@ function renderAttendanceChart() {
     });
 }
 
-// MANAGEMENT PEMBELAJARAN (MAPEL & NILAI)
 function renderPembelajaran() {
     if (!currentUser) return;
     const role = currentUser.role;
@@ -404,7 +508,6 @@ function deleteNilai(id) {
     }
 }
 
-// ABSENSI & PDF
 function renderAbsensi() {
     const tbody = document.getElementById('tbodyAbsensi');
     const selectedDate = document.getElementById('filterTanggalAbsensi').value;
@@ -485,7 +588,6 @@ function downloadAbsensiPDF() {
     });
 }
 
-// MANAGEMENT USER SYSTEM (ADMIN)
 function renderUsers() {
     const tbody = document.getElementById('tbodyUsers');
     if (!tbody) return;
