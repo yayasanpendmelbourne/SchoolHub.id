@@ -13,19 +13,22 @@
 body { background-color: var(--bg-main); color: var(--text-dark); }
 .hidden { display: none !important; }
 
-/* Dashboard Layout */
+.app-logo { width: 42px; height: 42px; object-fit: contain; }
+.app-logo.small { width: 34px; height: 34px; }
+
+.grid-2-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .breadcrumb { font-size: 0.8rem; color: #64748b; }
 .dashboard-grid-layout { display: grid; grid-template-columns: 320px 1fr; gap: 20px; margin-top: 15px; }
 
 .card { background: white; border-radius: var(--radius); border: 1px solid #e2e8f0; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
 .p-4 { padding: 20px; }
+.mt-2 { margin-top: 10px; }
 .mt-4 { margin-top: 20px; }
 
 .days-row { display: flex; justify-content: space-between; margin-top: 15px; text-align: center; }
 .days-row div { padding: 8px 6px; border-radius: 8px; font-size: 0.8rem; }
 .days-row div span { display: block; color: #94a3b8; font-size: 0.7rem; }
 .days-row div.active-day { background: #3b82f6; color: white; }
-.days-row div.active-day span { color: #dbeafe; }
 
 .schedule-item { display: flex; align-items: center; gap: 12px; margin-top: 12px; background: #f8fafc; padding: 10px; border-radius: 8px; }
 .badge-time { background: #dbeafe; color: #1e40af; font-size: 0.75rem; font-weight: 800; padding: 4px 8px; border-radius: 6px; }
@@ -40,7 +43,6 @@ body { background-color: var(--bg-main); color: var(--text-dark); }
 .green-border { border-top: 4px solid #3b82f6; }
 .green-light-border { border-top: 4px solid #10b981; }
 
-/* Filter & Controls */
 .filter-absensi-wrapper { display: flex; gap: 12px; align-items: center; }
 .input-date { padding: 8px 14px; border-radius: 8px; border: 1px solid #cbd5e1; font-weight: 600; }
 
@@ -48,18 +50,15 @@ body { background-color: var(--bg-main); color: var(--text-dark); }
 .toast.success { background-color: #10b981; }
 .toast.error { background-color: #ef4444; }
 
-/* Auth */
 .auth-wrapper { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #0f172a; }
 .auth-card { background: white; padding: 2.5rem; border-radius: 20px; width: 100%; max-width: 420px; }
 .brand-logo { display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 5px; }
-.logo-icon { width: 40px; height: 40px; background: #2563eb; color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; }
 .auth-subtitle { text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem; }
 
 .form-group { margin-bottom: 1rem; }
 .form-group label { display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 5px; }
 .form-group input, .form-group select { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; }
 
-/* Main Wrapper & Sidebar */
 .wrapper { display: flex; min-height: 100vh; background: var(--bg-content); }
 .sidebar { width: 260px; background: var(--sidebar-bg); color: white; padding: 1.5rem 1rem; display: flex; flex-direction: column; }
 .sidebar-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem; }
@@ -88,7 +87,6 @@ th { background: #f8fafc; color: var(--text-muted); font-size: 0.75rem; text-tra
 .btn-danger { background: #ef4444; color: white; padding: 5px 10px; font-size: 0.75rem; }
 .btn-secondary { background: #e2e8f0; color: #475569; }
 .btn-success { background: #10b981; color: white; }
-.btn-block { width: 100%; }
 
 .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
 .modal-card { background: white; padding: 2rem; border-radius: 16px; width: 90%; max-width: 500px; }
@@ -96,10 +94,10 @@ th { background: #f8fafc; color: var(--text-muted); font-size: 0.75rem; text-tra
 .full-width { grid-column: span 2; }
 .modal-actions { margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 10px; }
 
-/* KOP SURAT PRINT FORMAT (PDF) */
+/* PRINT KOP SURAT */
 .pdf-container { position: absolute; left: -9999px; top: -9999px; width: 800px; background: white; padding: 40px; color: black; font-family: 'Times New Roman', Times, serif; }
 .kop-surat { display: flex; align-items: center; gap: 20px; }
-.kop-logo { width: 70px; height: 70px; background: #2563eb; color: white; font-size: 2.5rem; font-weight: bold; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+.kop-logo-img { width: 75px; height: 75px; object-fit: contain; }
 .kop-text { text-align: center; flex: 1; }
 .kop-text h2 { font-size: 1.2rem; margin-bottom: 2px; text-transform: uppercase; }
 .kop-text h3 { font-size: 1rem; margin-bottom: 4px; font-weight: normal; }
