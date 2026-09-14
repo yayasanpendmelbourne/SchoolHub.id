@@ -15,10 +15,14 @@ body {
     min-height: 100vh;
 }
 
-/* Sidebar Styling */
+.hidden {
+    display: none !important;
+}
+
+/* Sidebar */
 .sidebar {
     width: 250px;
-    background-color: #1e293b;
+    background-color: #0f172a;
     color: #fff;
     padding: 2rem 1rem;
 }
@@ -45,18 +49,19 @@ body {
 }
 
 .sidebar li a:hover, .sidebar li a.active {
-    background-color: #0f172a;
-    color: #ffffff;
+    background-color: #1e293b;
+    color: #38bdf8;
+    font-weight: bold;
 }
 
-/* Main Content Styling */
+/* Content Area */
 .content {
     flex: 1;
     padding: 2rem;
 }
 
 header {
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 header h1 {
@@ -68,10 +73,16 @@ header p {
     color: #64748b;
 }
 
-/* Cards Grid */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Cards & Stats */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 1.5rem;
     margin-bottom: 2rem;
 }
@@ -80,13 +91,20 @@ header p {
     background: #ffffff;
     padding: 1.5rem;
     border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border-left: 5px solid #cbd5e1;
 }
 
+.card.border-blue { border-left-color: #0284c7; }
+.card.border-green { border-left-color: #16a34a; }
+.card.border-purple { border-left-color: #9333ea; }
+.card.border-orange { border-left-color: #ea580c; }
+
 .card h3 {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: #64748b;
     margin-bottom: 0.5rem;
+    text-transform: uppercase;
 }
 
 .stat-number {
@@ -95,17 +113,13 @@ header p {
     color: #0f172a;
 }
 
-/* Table Styling */
+/* Table */
 .table-section {
     background: #ffffff;
     padding: 1.5rem;
     border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.table-section h2 {
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    overflow-x: auto;
 }
 
 table {
@@ -117,6 +131,7 @@ th, td {
     padding: 0.75rem;
     text-align: left;
     border-bottom: 1px solid #e2e8f0;
+    font-size: 0.9rem;
 }
 
 th {
@@ -124,19 +139,93 @@ th {
     color: #475569;
 }
 
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
 .badge {
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: bold;
 }
 
-.badge.hadir {
-    background-color: #dcfce7;
-    color: #15803d;
+.badge.aktif { background-color: #dcfce7; color: #15803d; }
+.badge.cuti { background-color: #fef9c3; color: #a16207; }
+
+/* Buttons */
+.btn {
+    padding: 0.6rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: 0.2s;
 }
 
-.badge.izin {
-    background-color: #fef9c3;
-    color: #a16207;
+.btn-primary { background-color: #0284c7; color: white; }
+.btn-primary:hover { background-color: #0369a1; }
+.btn-secondary { background-color: #64748b; color: white; }
+.btn-danger { background-color: #ef4444; color: white; padding: 0.3rem 0.6rem; font-size: 0.75rem; }
+.btn-danger:hover { background-color: #dc2626; }
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 650px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-content h2 {
+    margin-bottom: 1.5rem;
+    color: #0f172a;
+}
+
+.form-group-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.full-width {
+    grid-column: span 2;
+}
+
+.form-group-grid label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+}
+
+.form-group-grid input, .form-group-grid select, .form-group-grid textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+}
+
+.modal-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
 }
