@@ -6,6 +6,9 @@
     <title>EduCore - School Management System</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <!-- CDN html2canvas & jsPDF untuk Cetak PDF Kop Surat -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -39,14 +42,6 @@
                     </select>
                 </div>
                 <button type="submit" class="btn btn-primary btn-block btn-glow">Masuk Ke Portal</button>
-                
-                <div class="credential-hint">
-                    <p><strong>Kredensial Login:</strong></p>
-                    <small>• Admin: <b>admin</b> / <b>admin123</b></small><br>
-                    <small>• Guru TK: <b>gurutk</b> / <b>tk123</b></small><br>
-                    <small>• Guru SD: <b>gurusd</b> / <b>sd123</b></small>
-                </div>
-
                 <p class="auth-link"><a href="#" onclick="showResetPage()">Lupa Password?</a></p>
             </form>
 
@@ -83,6 +78,10 @@
                 <ul>
                     <li class="role-admin role-guru_tk role-guru_sd"><a href="#" class="nav-link active" onclick="switchTab('dashboard', event)">⚡ Dashboard</a></li>
                     
+                    <!-- MENU ADMIN SYSTEM -->
+                    <li class="menu-divider role-admin">Pengaturan Sistem</li>
+                    <li class="role-admin"><a href="#" class="nav-link" onclick="switchTab('manajemen-user', event)">🔐 Manajemen Pengguna</a></li>
+
                     <!-- MENU TK -->
                     <li class="menu-divider role-admin role-guru_tk">Layanan TK</li>
                     <li class="role-admin role-guru_tk"><a href="#" class="nav-link" onclick="switchTab('siswa-tk', event)">👶 Murid TK</a></li>
@@ -138,6 +137,30 @@
                         </div>
                     </div>
                 </section>
+            </div>
+
+            <!-- MANAJEMEN PENGGUNA (KHUSUS ADMIN) -->
+            <div id="section-manajemen-user" class="tab-content hidden fade-in-up">
+                <header class="page-header">
+                    <div>
+                        <h1>Manajemen Pengguna Portal</h1>
+                        <p>Kelola hak akses dan akun login Admin, Guru TK, dan Guru SD.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModalUser()">+ Tambah Pengguna Baru</button>
+                </header>
+                <div class="card table-card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Nama Lengkap</th>
+                                <th>Role / Akses</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyUsers"></tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- SISWA TK -->
@@ -216,12 +239,16 @@
                 </div>
             </div>
 
-            <!-- FITUR ABSENSI SISWA -->
+            <!-- FITUR ABSENSI SISWA & CETAK PDF -->
             <div id="section-absensi" class="tab-content hidden fade-in-up">
                 <header class="page-header">
                     <div>
                         <h1>Absensi Siswa Harian</h1>
                         <p id="absensiSubtitle">Pencatatan kehadiran murid kelas.</p>
+                    </div>
+                    <div class="filter-absensi-wrapper">
+                        <input type="date" id="filterTanggalAbsensi" onchange="renderAbsensi()" class="input-date">
+                        <button id="btnDownloadPDF" class="btn btn-success hidden" onclick="downloadAbsensiPDF()">📄 Unduh Laporan PDF</button>
                     </div>
                 </header>
 
@@ -268,6 +295,90 @@
             </div>
 
         </main>
+    </div>
+
+    <!-- TEMPLATE PRINT KOP SURAT (HIDDEN OFFSCREEN CONTAINER) -->
+    <div id="pdfExportContainer" class="pdf-container">
+        <div class="kop-surat">
+            <div class="kop-logo">E</div>
+            <div class="kop-text">
+                <h2>YAYASAN EDUCATION CORE MELBOURNE</h2>
+                <h3>SEKOLAH TK & SD EDUCORE SCHOOL</h3>
+                <p>Jl. Pendidikan Modern No. 88, Kota Education | Telp: (021) 555-0199 | Website: www.educore.sch.id</p>
+            </div>
+        </div>
+        <hr class="kop-line">
+        <div class="kop-line-thin"></div>
+
+        <div class="pdf-body">
+            <h3 class="pdf-title">LAPORAN KEHADIRAN SISWA HARIAN</h3>
+            <div class="pdf-meta">
+                <p><strong>Tanggal:</strong> <span id="pdfTanggal">-</span></p>
+                <p><strong>Guru Pengampu:</strong> <span id="pdfGuru">-</span></p>
+            </div>
+
+            <table class="pdf-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>NIS / NISN</th>
+                        <th>Nama Siswa</th>
+                        <th>Kelas / Kelompok</th>
+                        <th>Status Kehadiran</th>
+                    </tr>
+                </thead>
+                <tbody id="pdfTbodyAbsensi"></tbody>
+            </table>
+
+            <div class="pdf-footer">
+                <div class="signature-box">
+                    <p>Mengetahui,</p>
+                    <p><strong>Kepala Sekolah</strong></p>
+                    <br><br><br>
+                    <p><u>Dr. Aris Setiawan, M.Pd.</u></p>
+                </div>
+                <div class="signature-box">
+                    <p>Guru Kelas,</p>
+                    <br><br><br><br>
+                    <p><u id="pdfNamaGuruSign">Guru Pengampu</u></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL USER BARU -->
+    <div id="modalUser" class="modal-backdrop hidden">
+        <div class="modal-card slide-up">
+            <h2>Tambah Pengguna Portal Baru</h2>
+            <form id="formUser" onsubmit="saveUser(event)">
+                <div class="form-group-grid">
+                    <div>
+                        <label>Username</label>
+                        <input type="text" id="userInputUsername" required>
+                    </div>
+                    <div>
+                        <label>Password</label>
+                        <input type="password" id="userInputPassword" required>
+                    </div>
+                    <div>
+                        <label>Nama Lengkap</label>
+                        <input type="text" id="userInputNama" required>
+                    </div>
+                    <div>
+                        <label>Role Akses</label>
+                        <select id="userInputRole" required>
+                            <option value="admin">Admin / Staff Sekolah</option>
+                            <option value="guru_tk">Guru TK</option>
+                            <option value="guru_sd">Guru SD</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModalUser()">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan User</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- MODAL SISWA -->
