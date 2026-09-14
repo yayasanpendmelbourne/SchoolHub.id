@@ -21,7 +21,6 @@
             </div>
             <p class="auth-subtitle">Sistem Informasi Manajemen Sekolah Modern</p>
             
-            <!-- Form Login -->
             <form id="formLogin" onsubmit="handleLogin(event)">
                 <div class="form-group">
                     <label>Username / ID Staff</label>
@@ -51,7 +50,6 @@
                 <p class="auth-link"><a href="#" onclick="showResetPage()">Lupa Password?</a></p>
             </form>
 
-            <!-- Form Reset Password -->
             <form id="formReset" class="hidden" onsubmit="handleReset(event)">
                 <div class="form-group">
                     <label>Email Terdaftar</label>
@@ -85,15 +83,19 @@
                 <ul>
                     <li class="role-admin role-guru_tk role-guru_sd"><a href="#" class="nav-link active" onclick="switchTab('dashboard', event)">⚡ Dashboard</a></li>
                     
+                    <!-- MENU TK -->
                     <li class="menu-divider role-admin role-guru_tk">Layanan TK</li>
                     <li class="role-admin role-guru_tk"><a href="#" class="nav-link" onclick="switchTab('siswa-tk', event)">👶 Murid TK</a></li>
-                    <li class="role-admin role-guru_tk"><a href="#" class="nav-link" onclick="switchTab('guru-tk', event)">👩‍🏫 Guru TK</a></li>
+                    <li class="role-admin"><a href="#" class="nav-link" onclick="switchTab('guru-tk', event)">👩‍🏫 Data Guru TK</a></li>
                     
+                    <!-- MENU SD -->
                     <li class="menu-divider role-admin role-guru_sd">Layanan SD</li>
                     <li class="role-admin role-guru_sd"><a href="#" class="nav-link" onclick="switchTab('siswa-sd', event)">🎒 Murid SD</a></li>
-                    <li class="role-admin role-guru_sd"><a href="#" class="nav-link" onclick="switchTab('guru-sd', event)">👨‍🏫 Guru SD</a></li>
+                    <li class="role-admin"><a href="#" class="nav-link" onclick="switchTab('guru-sd', event)">👨‍🏫 Data Guru SD</a></li>
                     
-                    <li class="menu-divider">Administrasi</li>
+                    <!-- MENU AKADEMIK & ADMINISTRASI -->
+                    <li class="menu-divider">Kegiatan Harian</li>
+                    <li class="role-admin role-guru_tk role-guru_sd"><a href="#" class="nav-link" onclick="switchTab('absensi', event)">📅 Absensi Siswa</a></li>
                     <li class="role-admin role-guru_tk role-guru_sd"><a href="#" class="nav-link" onclick="switchTab('buku-kerja', event)">📑 Buku Kerja Digital</a></li>
                 </ul>
             </nav>
@@ -176,40 +178,65 @@
                 </div>
             </div>
 
-            <!-- GURU TK -->
+            <!-- GURU TK (ADMIN ONLY) -->
             <div id="section-guru-tk" class="tab-content hidden fade-in-up">
                 <header class="page-header">
                     <div>
                         <h1>Data Guru TK</h1>
-                        <p>Daftar pengajar & pendidik TK.</p>
+                        <p>Kelola staf pengajar & pendidik Taman Kanak-Kanak.</p>
                     </div>
                     <button class="btn btn-primary role-admin-only hidden" onclick="openModalGuru('TK')">+ Tambah Guru TK</button>
                 </header>
                 <div class="card table-card">
                     <table>
                         <thead>
-                            <tr><th>NIP</th><th>Nama Lengkap</th><th>Jabatan</th><th>Kelompok Diampu</th><th>No. HP</th></tr>
+                            <tr><th>NIP</th><th>Nama Lengkap</th><th>Jabatan</th><th>Kelompok</th><th>No. HP</th><th>Aksi</th></tr>
                         </thead>
                         <tbody id="tbodyGuruTK"></tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- GURU SD -->
+            <!-- GURU SD (ADMIN ONLY) -->
             <div id="section-guru-sd" class="tab-content hidden fade-in-up">
                 <header class="page-header">
                     <div>
                         <h1>Data Guru SD</h1>
-                        <p>Daftar staf pengajar Sekolah Dasar.</p>
+                        <p>Kelola staf pengajar Sekolah Dasar.</p>
                     </div>
                     <button class="btn btn-primary role-admin-only hidden" onclick="openModalGuru('SD')">+ Tambah Guru SD</button>
                 </header>
                 <div class="card table-card">
                     <table>
                         <thead>
-                            <tr><th>NIP</th><th>Nama Lengkap</th><th>Jabatan</th><th>Mata Pelajaran</th><th>No. HP</th></tr>
+                            <tr><th>NIP</th><th>Nama Lengkap</th><th>Jabatan</th><th>Mata Pelajaran</th><th>No. HP</th><th>Aksi</th></tr>
                         </thead>
                         <tbody id="tbodyGuruSD"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- FITUR ABSENSI SISWA -->
+            <div id="section-absensi" class="tab-content hidden fade-in-up">
+                <header class="page-header">
+                    <div>
+                        <h1>Absensi Siswa Harian</h1>
+                        <p id="absensiSubtitle">Pencatatan kehadiran murid kelas.</p>
+                    </div>
+                </header>
+
+                <div class="card table-card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>NIS / NISN</th>
+                                <th>Nama Siswa</th>
+                                <th>Tingkat</th>
+                                <th>Kelas / Kelompok</th>
+                                <th>Status Kehadiran</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyAbsensi"></tbody>
                     </table>
                 </div>
             </div>
