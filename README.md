@@ -1,16 +1,12 @@
-# E-Portal SMS Sekolah
+# School Management System (SMS) E-Portal
 
-Portal sistem informasi dan layanan pengiriman notifikasi SMS sekolah.
+Sistem Informasi Manajemen Sekolah berbasis web untuk mengelola data siswa, guru, absensi, dan nilai secara terpusat.
 
 ## Fitur Utama
-- Form pengiriman pesan notifikasi/absensi.
-- Interface sederhana dan responsif.
+- Dashboard Statistik
+- Manajemen Data Siswa & Guru
+- Rekapitulasi Absensi & Nilai
 
-## Struktur File
-- `index.html` - Halaman antarmuka utama.
-- `style.css` - File tata letak dan desain visual.
-- `script.js` - Logika pemrosesan form di sisi browser.
-
-## Panduan Penggunaan
-1. Clone repositori ini: `git clone https://github.com/username/repository.git`
-2. Buka `index.html` di browser web favorit Anda.
+## Teknologi
+- HTML5 & CSS3
+- JavaScript (Vanilla)
