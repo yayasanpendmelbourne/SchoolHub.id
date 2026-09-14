@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EduCore - School Management System</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -14,12 +14,12 @@
 
     <!-- HALAMAN LOGIN & RESET PASSWORD -->
     <div id="loginPage" class="auth-wrapper">
-        <div class="auth-card glass-panel fade-in">
+        <div class="auth-card glass-panel fade-in-up">
             <div class="brand-logo">
                 <div class="logo-icon">E</div>
                 <h2>EduCore <span>SMS</span></h2>
             </div>
-            <p class="auth-subtitle">Sistem Informasi Manajemen Sekolah Interaktif</p>
+            <p class="auth-subtitle">Sistem Informasi Manajemen Sekolah Modern</p>
             
             <!-- Form Login -->
             <form id="formLogin" onsubmit="handleLogin(event)">
@@ -42,9 +42,10 @@
                 <button type="submit" class="btn btn-primary btn-block btn-glow">Masuk Ke Portal</button>
                 
                 <div class="credential-hint">
-                    <p><strong>Demo Credential:</strong></p>
-                    <small>Admin: admin / admin123</small><br>
-                    <small>Guru TK: gurutk / tk123 | Guru SD: gurusd / sd123</small>
+                    <p><strong>Kredensial Login:</strong></p>
+                    <small>• Admin: <b>admin</b> / <b>admin123</b></small><br>
+                    <small>• Guru TK: <b>gurutk</b> / <b>tk123</b></small><br>
+                    <small>• Guru SD: <b>gurusd</b> / <b>sd123</b></small>
                 </div>
 
                 <p class="auth-link"><a href="#" onclick="showResetPage()">Lupa Password?</a></p>
@@ -104,7 +105,7 @@
         <main class="content">
             
             <!-- DASHBOARD -->
-            <div id="section-dashboard" class="tab-content fade-in">
+            <div id="section-dashboard" class="tab-content fade-in-up">
                 <header class="page-header">
                     <div>
                         <h1>Dashboard Overview</h1>
@@ -113,22 +114,22 @@
                 </header>
 
                 <section class="stats-grid">
-                    <div class="card stat-card blue-gradient">
-                        <div class="stat-icon">👶</div>
+                    <div class="card stat-card card-hover-effect">
+                        <div class="stat-icon blue-bg">👶</div>
                         <div>
                             <h3>Siswa TK</h3>
                             <p class="stat-number" id="statSiswaTK">0</p>
                         </div>
                     </div>
-                    <div class="card stat-card green-gradient">
-                        <div class="stat-icon">🎒</div>
+                    <div class="card stat-card card-hover-effect">
+                        <div class="stat-icon sky-bg">🎒</div>
                         <div>
                             <h3>Siswa SD</h3>
                             <p class="stat-number" id="statSiswaSD">0</p>
                         </div>
                     </div>
-                    <div class="card stat-card purple-gradient">
-                        <div class="stat-icon">👩‍🏫</div>
+                    <div class="card stat-card card-hover-effect">
+                        <div class="stat-icon navy-bg">👨‍🏫</div>
                         <div>
                             <h3>Guru & Staff</h3>
                             <p class="stat-number" id="statGuru">0</p>
@@ -138,13 +139,13 @@
             </div>
 
             <!-- SISWA TK -->
-            <div id="section-siswa-tk" class="tab-content hidden fade-in">
+            <div id="section-siswa-tk" class="tab-content hidden fade-in-up">
                 <header class="page-header">
                     <div>
                         <h1>Data Murid TK</h1>
-                        <p>Daftar lengkap peserta didik tingkat Taman Kanak-Kanak.</p>
+                        <p>Daftar peserta didik tingkat Taman Kanak-Kanak.</p>
                     </div>
-                    <button class="btn btn-primary role-admin" onclick="openModalSiswa('TK')">+ Tambah Murid TK</button>
+                    <button class="btn btn-primary role-admin-only hidden" onclick="openModalSiswa('TK')">+ Tambah Murid TK</button>
                 </header>
                 <div class="card table-card">
                     <table>
@@ -157,13 +158,13 @@
             </div>
 
             <!-- SISWA SD -->
-            <div id="section-siswa-sd" class="tab-content hidden fade-in">
+            <div id="section-siswa-sd" class="tab-content hidden fade-in-up">
                 <header class="page-header">
                     <div>
                         <h1>Data Murid SD</h1>
-                        <p>Daftar lengkap peserta didik Sekolah Dasar.</p>
+                        <p>Daftar peserta didik Sekolah Dasar.</p>
                     </div>
-                    <button class="btn btn-primary role-admin" onclick="openModalSiswa('SD')">+ Tambah Murid SD</button>
+                    <button class="btn btn-primary role-admin-only hidden" onclick="openModalSiswa('SD')">+ Tambah Murid SD</button>
                 </header>
                 <div class="card table-card">
                     <table>
@@ -176,9 +177,13 @@
             </div>
 
             <!-- GURU TK -->
-            <div id="section-guru-tk" class="tab-content hidden fade-in">
+            <div id="section-guru-tk" class="tab-content hidden fade-in-up">
                 <header class="page-header">
-                    <h1>Data Guru TK</h1>
+                    <div>
+                        <h1>Data Guru TK</h1>
+                        <p>Daftar pengajar & pendidik TK.</p>
+                    </div>
+                    <button class="btn btn-primary role-admin-only hidden" onclick="openModalGuru('TK')">+ Tambah Guru TK</button>
                 </header>
                 <div class="card table-card">
                     <table>
@@ -191,9 +196,13 @@
             </div>
 
             <!-- GURU SD -->
-            <div id="section-guru-sd" class="tab-content hidden fade-in">
+            <div id="section-guru-sd" class="tab-content hidden fade-in-up">
                 <header class="page-header">
-                    <h1>Data Guru SD</h1>
+                    <div>
+                        <h1>Data Guru SD</h1>
+                        <p>Daftar staf pengajar Sekolah Dasar.</p>
+                    </div>
+                    <button class="btn btn-primary role-admin-only hidden" onclick="openModalGuru('SD')">+ Tambah Guru SD</button>
                 </header>
                 <div class="card table-card">
                     <table>
@@ -205,12 +214,12 @@
                 </div>
             </div>
 
-            <!-- BUKU KERJA GURU (PAPERLESS) -->
-            <div id="section-buku-kerja" class="tab-content hidden fade-in">
+            <!-- BUKU KERJA GURU -->
+            <div id="section-buku-kerja" class="tab-content hidden fade-in-up">
                 <header class="page-header">
                     <div>
                         <h1>Buku Kerja Digital Guru</h1>
-                        <p>Penyelesaian administrasi guru bebas kertas (Paperless) & Validasi Terintegrasi.</p>
+                        <p>Penyelesaian administrasi guru paperless terintegrasi.</p>
                     </div>
                     <button class="btn btn-primary" onclick="openModalBukuKerja()">+ Dokumen Baru</button>
                 </header>
@@ -234,6 +243,78 @@
         </main>
     </div>
 
+    <!-- MODAL SISWA -->
+    <div id="modalSiswa" class="modal-backdrop hidden">
+        <div class="modal-card slide-up">
+            <h2 id="modalSiswaTitle">Tambah Siswa Baru</h2>
+            <form id="formSiswa" onsubmit="saveSiswa(event)">
+                <input type="hidden" id="siswaTingkat">
+                <div class="form-group-grid">
+                    <div>
+                        <label>NIS / NISN</label>
+                        <input type="text" id="siswaNis" required>
+                    </div>
+                    <div>
+                        <label>Nama Lengkap</label>
+                        <input type="text" id="siswaNama" required>
+                    </div>
+                    <div>
+                        <label>Kelas / Kelompok</label>
+                        <input type="text" id="siswaKelas" placeholder="Misal: TK A / SD Kelas 1" required>
+                    </div>
+                    <div>
+                        <label>Nama Orang Tua</label>
+                        <input type="text" id="siswaOrtu" required>
+                    </div>
+                    <div class="full-width">
+                        <label>No. HP Orang Tua</label>
+                        <input type="text" id="siswaHp" placeholder="08xxxxxxxxxx" required>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModalSiswa()">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Siswa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL GURU -->
+    <div id="modalGuru" class="modal-backdrop hidden">
+        <div class="modal-card slide-up">
+            <h2 id="modalGuruTitle">Tambah Guru / Staff Baru</h2>
+            <form id="formGuru" onsubmit="saveGuru(event)">
+                <input type="hidden" id="guruTingkat">
+                <div class="form-group-grid">
+                    <div>
+                        <label>NIP / ID Staff</label>
+                        <input type="text" id="guruNip" placeholder="G-TK-0X / G-SD-0X" required>
+                    </div>
+                    <div>
+                        <label>Nama Lengkap & Gelar</label>
+                        <input type="text" id="guruNama" required>
+                    </div>
+                    <div>
+                        <label>Jabatan</label>
+                        <input type="text" id="guruJabatan" placeholder="Wali Kelas / Guru Pengajar" required>
+                    </div>
+                    <div>
+                        <label>Mata Pelajaran / Kelompok</label>
+                        <input type="text" id="guruMapel" placeholder="Matematika / Kelompok B" required>
+                    </div>
+                    <div class="full-width">
+                        <label>No. HP Active</label>
+                        <input type="text" id="guruHp" placeholder="08xxxxxxxxxx" required>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModalGuru()">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Staff Guru</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- MODAL BUKU KERJA -->
     <div id="modalBukuKerja" class="modal-backdrop hidden">
         <div class="modal-card slide-up">
@@ -255,7 +336,7 @@
                     </div>
                     <div class="full-width">
                         <label>Uraian Dokumen / Link Modul Drive</label>
-                        <textarea id="docContent" rows="4" placeholder="Masukkan uraian atau tautan dokumen administrasi..." required></textarea>
+                        <textarea id="docContent" rows="4" placeholder="Masukkan uraian atau tautan dokumen..." required></textarea>
                     </div>
                 </div>
                 <div class="modal-actions">
