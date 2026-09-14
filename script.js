@@ -1,4 +1,4 @@
-// Database Kredensial Valid & Role
+// Database Kredensial Valid
 const VALID_USERS = {
     'admin': { pass: 'admin123', role: 'admin', name: 'Administrator Staff', avatar: 'Admin' },
     'gurutk': { pass: 'tk123', role: 'guru_tk', name: 'Siti Rahma, S.Pd.', avatar: 'Rahma' },
@@ -9,13 +9,15 @@ let currentUser = null;
 
 // Database Mock Data
 let dataSiswa = [
-    { nis: '101', nama: 'Ahmad Fauzi', tingkat: 'TK', kelas: 'TK B', ortu: 'Budi Fauzi', hp: '08123456781', status: 'Aktif' },
-    { nis: '201', nama: 'Siti Nurhaliza', tingkat: 'SD', kelas: 'SD Kelas 2', ortu: 'Rahmat', hp: '08123456782', status: 'Aktif' }
+    { nis: '101', nama: 'Ahmad Fauzi', tingkat: 'TK', kelas: 'TK B', ortu: 'Budi Fauzi', hp: '08123456781', absensi: 'Hadir' },
+    { nis: '102', nama: 'Anisa Putri', tingkat: 'TK', kelas: 'TK A', ortu: 'Hendra', hp: '08123456784', absensi: 'Hadir' },
+    { nis: '201', nama: 'Siti Nurhaliza', tingkat: 'SD', kelas: 'SD Kelas 2', ortu: 'Rahmat', hp: '08123456782', absensi: 'Hadir' },
+    { nis: '202', nama: 'Doni Pratama', tingkat: 'SD', kelas: 'SD Kelas 5', ortu: 'Eko', hp: '08123456785', absensi: 'Izin' }
 ];
 
 let dataGuru = [
-    { nip: 'G-TK-01', nama: 'Siti Rahma, S.Pd.', tingkat: 'TK', jabatan: 'Guru Kelompok B', mapel: 'Tematik TK', hp: '081987654321' },
-    { nip: 'G-SD-01', nama: 'Budi Santoso, S.Pd.', tingkat: 'SD', jabatan: 'Guru Wali Kelas 2', mapel: 'Matematika', hp: '081987654322' }
+    { id: 1, nip: 'G-TK-01', nama: 'Siti Rahma, S.Pd.', tingkat: 'TK', jabatan: 'Guru Kelompok B', mapel: 'Tematik TK', hp: '081987654321' },
+    { id: 2, nip: 'G-SD-01', nama: 'Budi Santoso, S.Pd.', tingkat: 'SD', jabatan: 'Guru Wali Kelas 2', mapel: 'Matematika', hp: '081987654322' }
 ];
 
 let dataBukuKerja = [
@@ -41,11 +43,9 @@ function handleLogin(e) {
 
     const userObj = VALID_USERS[uInput];
 
-    // Validasi Kredensial
     if (userObj && userObj.pass === pInput && userObj.role === rInput) {
         currentUser = { username: uInput, ...userObj };
         
-        // Render Dashboard App
         document.getElementById('loginPage').classList.add('hidden');
         document.getElementById('mainApp').classList.remove('hidden');
 
@@ -86,20 +86,17 @@ function handleReset(e) {
     showLoginPage();
 }
 
-// Strict Role-Based Access Control (Menu & Action Filter)
+// Strict Role-Based Access Control
 function applyRolePermissions(role) {
-    // Hide/Show Sidebar Menu berbasis Role
     document.querySelectorAll('.sidebar-menu li').forEach(el => {
         const isAllowed = Array.from(el.classList).some(c => c === `role-${role}` || c === 'menu-divider');
         el.classList.toggle('hidden', !isAllowed);
     });
 
-    // Tampilkan tombol khusus Admin (Tambah Siswa, Guru, dll)
     document.querySelectorAll('.role-admin-only').forEach(el => {
         el.classList.toggle('hidden', role !== 'admin');
     });
 
-    // Arahkan otomatis ke Dashboard saat pertama kali login
     switchTab('dashboard');
 }
 
@@ -111,6 +108,8 @@ function switchTab(tabName, event) {
 
     document.getElementById(`section-${tabName}`).classList.remove('hidden');
     if (event) event.target.classList.add('active');
+
+    if (tabName === 'absensi') renderAbsensi();
 }
 
 // Render Data Tables
@@ -120,27 +119,97 @@ function renderAllData() {
     tbodyTK.innerHTML = ''; tbodySD.innerHTML = '';
 
     dataSiswa.forEach(s => {
-        const row = `<tr><td>${s.nis}</td><td><strong>${s.nama}</strong></td><td>${s.kelas}</td><td>${s.ortu}</td><td>${s.hp}</td><td><span class="badge-status aktif">${s.status}</span></td></tr>`;
+        const row = `<tr><td>${s.nis}</td><td><strong>${s.nama}</strong></td><td>${s.kelas}</td><td>${s.ortu}</td><td>${s.hp}</td><td><span class="badge-status aktif">Aktif</span></td></tr>`;
         if (s.tingkat === 'TK') tbodyTK.innerHTML += row;
         else tbodySD.innerHTML += row;
     });
 
+    renderGuruTables();
+    renderBukuKerja();
+
+    document.getElementById('statSiswaTK').innerText = dataSiswa.filter(s => s.tingkat === 'TK').length;
+    document.getElementById('statSiswaSD').innerText = dataSiswa.filter(s => s.tingkat === 'SD').length;
+    document.getElementById('statGuru').innerText = dataGuru.length;
+}
+
+function renderGuruTables() {
     const tbodyGTK = document.getElementById('tbodyGuruTK');
     const tbodyGSD = document.getElementById('tbodyGuruSD');
     tbodyGTK.innerHTML = ''; tbodyGSD.innerHTML = '';
 
     dataGuru.forEach(g => {
-        const row = `<tr><td>${g.nip}</td><td><strong>${g.nama}</strong></td><td>${g.jabatan}</td><td>${g.mapel}</td><td>${g.hp}</td></tr>`;
+        const deleteBtn = (currentUser && currentUser.role === 'admin') 
+            ? `<button class="btn btn-danger" onclick="deleteGuru(${g.id})">🗑️ Hapus</button>` 
+            : `-`;
+            
+        const row = `<tr>
+            <td>${g.nip}</td>
+            <td><strong>${g.nama}</strong></td>
+            <td>${g.jabatan}</td>
+            <td>${g.mapel}</td>
+            <td>${g.hp}</td>
+            <td>${deleteBtn}</td>
+        </tr>`;
+        
         if (g.tingkat === 'TK') tbodyGTK.innerHTML += row;
         else tbodyGSD.innerHTML += row;
     });
+}
 
-    renderBukuKerja();
+// Render Absensi Berdasarkan Peran
+function renderAbsensi() {
+    const tbody = document.getElementById('tbodyAbsensi');
+    const subtitle = document.getElementById('absensiSubtitle');
+    tbody.innerHTML = '';
 
-    // Update Counter Stat
-    document.getElementById('statSiswaTK').innerText = dataSiswa.filter(s => s.tingkat === 'TK').length;
-    document.getElementById('statSiswaSD').innerText = dataSiswa.filter(s => s.tingkat === 'SD').length;
-    document.getElementById('statGuru').innerText = dataGuru.length;
+    let filteredSiswa = dataSiswa;
+
+    if (currentUser.role === 'guru_tk') {
+        filteredSiswa = dataSiswa.filter(s => s.tingkat === 'TK');
+        subtitle.innerText = "Pencatatan Kehadiran Harian Murid Taman Kanak-Kanak (TK).";
+    } else if (currentUser.role === 'guru_sd') {
+        filteredSiswa = dataSiswa.filter(s => s.tingkat === 'SD');
+        subtitle.innerText = "Pencatatan Kehadiran Harian Murid Sekolah Dasar (SD).";
+    } else {
+        subtitle.innerText = "Pencatatan Kehadiran Seluruh Siswa Sekolah.";
+    }
+
+    filteredSiswa.forEach((s, idx) => {
+        tbody.innerHTML += `
+            <tr>
+                <td>${s.nis}</td>
+                <td><strong>${s.nama}</strong></td>
+                <td><span class="badge-role">${s.tingkat}</span></td>
+                <td>${s.kelas}</td>
+                <td>
+                    <select class="select-absensi" onchange="updateAbsensi('${s.nis}', this.value)">
+                        <option value="Hadir" ${s.absensi === 'Hadir' ? 'selected' : ''}>✅ Hadir</option>
+                        <option value="Izin" ${s.absensi === 'Izin' ? 'selected' : ''}>📩 Izin</option>
+                        <option value="Sakit" ${s.absensi === 'Sakit' ? 'selected' : ''}>🏥 Sakit</option>
+                        <option value="Alpa" ${s.absensi === 'Alpa' ? 'selected' : ''}>❌ Alpa</option>
+                    </select>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+function updateAbsensi(nis, status) {
+    const target = dataSiswa.find(s => s.nis === nis);
+    if (target) {
+        target.absensi = status;
+        showToast(`Absensi ${target.nama} diperbarui: ${status}`);
+    }
+}
+
+// Hapus Guru (Khusus Admin)
+function deleteGuru(id) {
+    if (confirm("Apakah Anda yakin ingin menghapus data guru ini?")) {
+        dataGuru = dataGuru.filter(g => g.id !== id);
+        renderGuruTables();
+        document.getElementById('statGuru').innerText = dataGuru.length;
+        showToast("Data Guru berhasil dihapus!", "error");
+    }
 }
 
 function renderBukuKerja() {
@@ -185,7 +254,7 @@ function saveSiswa(e) {
         kelas: document.getElementById('siswaKelas').value,
         ortu: document.getElementById('siswaOrtu').value,
         hp: document.getElementById('siswaHp').value,
-        status: 'Aktif'
+        absensi: 'Hadir'
     });
     renderAllData();
     closeModalSiswa();
@@ -206,6 +275,7 @@ function closeModalGuru() {
 function saveGuru(e) {
     e.preventDefault();
     dataGuru.push({
+        id: Date.now(),
         nip: document.getElementById('guruNip').value,
         nama: document.getElementById('guruNama').value,
         tingkat: document.getElementById('guruTingkat').value,
