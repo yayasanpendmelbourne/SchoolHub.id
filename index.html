@@ -12,10 +12,8 @@
 </head>
 <body>
 
-<!-- Toast -->
 <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
-<!-- Konfirmasi -->
 <div id="modalConfirm" class="modal-backdrop hidden" data-modal role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
   <div class="modal-card confirm-dialog">
     <div class="confirm-dialog-icon" aria-hidden="true">⚠️</div>
@@ -38,13 +36,13 @@
 
     <div class="auth-pitch">
       <h1>Satu portal untuk TK dan SD.</h1>
-      <p>Data murid, absensi harian, penilaian, dan kepegawaian dikelola di tempat yang sama — setiap guru hanya melihat jenjang yang ia ampu.</p>
+      <p>Data Dapodik, kurikulum, penilaian formatif dan sumatif, sampai leger sekolah dikelola di tempat yang sama — setiap guru hanya melihat kelas dan jenjang yang ia ampu.</p>
     </div>
 
     <div class="auth-facts">
       <div><strong>2</strong><span>Jenjang</span></div>
-      <div><strong>4</strong><span>Modul</span></div>
-      <div><strong>3</strong><span>Tingkat akses</span></div>
+      <div><strong>11</strong><span>Modul</span></div>
+      <div><strong>4</strong><span>Jenis penugasan</span></div>
     </div>
   </section>
 
@@ -65,7 +63,7 @@
             <input type="password" id="loginPass" autocomplete="current-password" placeholder="••••••••" required>
             <button type="button" id="togglePass" aria-label="Tampilkan kata sandi">👁️</button>
           </div>
-          <p class="field-hint">Peran Anda dikenali otomatis dari akun ini.</p>
+          <p class="field-hint">Peran dan penugasan dikenali otomatis dari akun ini.</p>
         </div>
 
         <button type="submit" class="btn btn-primary btn-lg btn-block">Masuk</button>
@@ -76,7 +74,7 @@
         <ul>
           <li>Admin — <code>admin</code> / <code>admin123</code></li>
           <li>Guru TK — <code>gurutk</code> / <code>tk123</code></li>
-          <li>Guru SD — <code>gurusd</code> / <code>sd123</code></li>
+          <li>Wali kelas SD — <code>gurusd</code> / <code>sd123</code></li>
         </ul>
       </div>
     </div>
@@ -110,7 +108,12 @@
           </a>
         </li>
 
-        <li class="menu-divider" data-roles="admin">Kepegawaian</li>
+        <li class="menu-divider" data-roles="admin">Data induk</li>
+        <li data-roles="admin">
+          <a href="#" class="nav-link" data-tab="dapodik" onclick="switchTab('dapodik', event)">
+            <span class="nav-ico" aria-hidden="true">🏫</span><span>Integrasi Dapodik</span>
+          </a>
+        </li>
         <li data-roles="admin">
           <a href="#" class="nav-link" data-tab="manajemen-hr" onclick="switchTab('manajemen-hr', event)">
             <span class="nav-ico" aria-hidden="true">👥</span><span>Data karyawan</span>
@@ -118,14 +121,48 @@
         </li>
         <li data-roles="admin">
           <a href="#" class="nav-link" data-tab="manajemen-user" onclick="switchTab('manajemen-user', event)">
-            <span class="nav-ico" aria-hidden="true">🔐</span><span>Akun pengguna</span>
+            <span class="nav-ico" aria-hidden="true">🔐</span><span>User &amp; akses</span>
           </a>
         </li>
 
-        <li class="menu-divider" data-roles="admin,guru_tk,guru_sd">Akademik</li>
+        <li class="menu-divider" data-roles="admin">Kurikulum &amp; nilai</li>
+        <li data-roles="admin">
+          <a href="#" class="nav-link" data-tab="kurikulum" onclick="switchTab('kurikulum', event)">
+            <span class="nav-ico" aria-hidden="true">🧭</span><span>Penyelarasan CP–TP</span>
+          </a>
+        </li>
+        <li data-roles="admin">
+          <a href="#" class="nav-link" data-tab="leger" onclick="switchTab('leger', event)">
+            <span class="nav-ico" aria-hidden="true">🔒</span><span>Leger &amp; penguncian</span>
+          </a>
+        </li>
+
+        <li class="menu-divider" data-roles="admin,guru_tk,guru_sd">Penilaian</li>
         <li data-roles="admin,guru_tk,guru_sd">
           <a href="#" class="nav-link" data-tab="manajemen-pembelajaran" onclick="switchTab('manajemen-pembelajaran', event)">
             <span class="nav-ico" aria-hidden="true">📚</span><span>Mapel &amp; nilai</span>
+          </a>
+        </li>
+        <li data-roles="guru_sd">
+          <a href="#" class="nav-link" data-tab="deskripsi" onclick="switchTab('deskripsi', event)">
+            <span class="nav-ico" aria-hidden="true">✍️</span><span>Deskripsi akademik</span>
+          </a>
+        </li>
+
+        <li class="menu-divider" data-roles="guru_sd">Kelas saya</li>
+        <li data-roles="guru_sd">
+          <a href="#" class="nav-link" data-tab="sikap" onclick="switchTab('sikap', event)">
+            <span class="nav-ico" aria-hidden="true">🌱</span><span>Sikap &amp; catatan wali</span>
+          </a>
+        </li>
+        <li data-roles="guru_sd">
+          <a href="#" class="nav-link" data-tab="p5" onclick="switchTab('p5', event)">
+            <span class="nav-ico" aria-hidden="true">🧩</span><span>Penilaian P5</span>
+          </a>
+        </li>
+        <li data-roles="guru_sd">
+          <a href="#" class="nav-link" data-tab="ekskul" onclick="switchTab('ekskul', event)">
+            <span class="nav-ico" aria-hidden="true">⚽</span><span>Ekstrakurikuler</span>
           </a>
         </li>
 
@@ -149,8 +186,6 @@
             <span class="nav-ico" aria-hidden="true">📅</span><span>Absensi</span>
           </a>
         </li>
-
-        <li class="menu-divider" data-roles="admin">Integrasi</li>
         <li data-roles="admin">
           <a href="#" class="nav-link" data-tab="rekap-absensi-gas" onclick="switchTab('rekap-absensi-gas', event)">
             <span class="nav-ico" aria-hidden="true">📊</span><span>Google Sheets</span>
@@ -173,6 +208,8 @@
       </div>
 
       <div class="top-nav-right">
+        <span class="badge-role" id="periodeTag" title="Periode aktif">—</span>
+        <span class="badge-role tag-lock hidden" id="lockTag">Nilai terkunci</span>
         <div class="notif-dropdown-wrapper" id="notifWrapper">
           <button class="btn-notif" onclick="toggleNotifDropdown(event)" aria-label="Pemberitahuan" aria-expanded="false" id="notifBtn">
             🔔<span class="notif-badge hidden" id="notifCount">0</span>
@@ -188,7 +225,7 @@
       </div>
     </div>
 
-    <!-- RINGKASAN -->
+    <!-- ============ RINGKASAN ============ -->
     <div id="section-dashboard" class="tab-content">
       <div class="greeting">
         <h1 id="greetingTitle">Selamat datang</h1>
@@ -197,7 +234,7 @@
 
       <div class="stat-strip">
         <div class="stat-box stat-accent-a">
-          <small>Peran akses</small>
+          <small>Penugasan</small>
           <span class="stat-value is-text" id="dashRoleTitle">—</span>
         </div>
         <div class="stat-box stat-accent-b">
@@ -208,6 +245,15 @@
           <small>Hadir hari ini</small>
           <span class="stat-value" id="dashHadirHariIni">0%</span>
         </div>
+      </div>
+
+      <div id="dashProgresCard" class="card p-4 mt-4 hidden">
+        <div class="card-title">
+          <h3>Kelengkapan rapor</h3>
+          <span class="badge-role tag-accent" id="dashProgresKelas">—</span>
+        </div>
+        <p class="text-muted" style="font-size:.8125rem;">Komponen rapor yang sudah terisi untuk murid Anda.</p>
+        <div id="dashProgresList" class="mt-4"></div>
       </div>
 
       <div class="dashboard-grid-layout">
@@ -229,12 +275,10 @@
           </div>
 
           <div class="card mt-4">
-            <div class="p-4" style="padding-bottom:8px;">
-              <h3>Penilaian terbaru</h3>
-            </div>
+            <div class="p-4" style="padding-bottom:8px;"><h3>Penilaian terbaru</h3></div>
             <div class="table-responsive">
               <table>
-                <thead><tr><th>Murid</th><th>Mata pelajaran</th><th>Capaian</th><th>Catatan</th></tr></thead>
+                <thead><tr><th>Murid</th><th>Mata pelajaran</th><th>Jenis</th><th>Nilai</th></tr></thead>
                 <tbody id="dashTbodyNilai"></tbody>
               </table>
             </div>
@@ -243,7 +287,89 @@
       </div>
     </div>
 
-    <!-- KEPEGAWAIAN -->
+    <!-- ============ INTEGRASI DAPODIK ============ -->
+    <div id="section-dapodik" class="tab-content hidden">
+      <div class="page-head">
+        <div>
+          <h2>Integrasi Dapodik</h2>
+          <p>Impor profil sekolah, guru, rombongan belajar, mata pelajaran, dan peserta didik dari unduhan Dapodik.</p>
+        </div>
+        <div class="page-head-actions">
+          <button class="btn btn-secondary" onclick="muatPaketDapodik()">Muat paket contoh</button>
+        </div>
+      </div>
+
+      <div class="grid-2-col">
+        <div class="card p-4">
+          <h3>Profil sekolah</h3>
+          <p class="text-muted" style="font-size:.8125rem;">Dipakai sebagai kop leger dan rapor.</p>
+          <form id="formSekolah" class="mt-4" onsubmit="saveSekolah(event)">
+            <div class="grid-2-col" style="gap:0 16px;">
+              <div class="form-group"><label for="skNpsn">NPSN</label><input type="text" id="skNpsn" required></div>
+              <div class="form-group"><label for="skJenjang">Bentuk pendidikan</label>
+                <select id="skJenjang"><option>TK &amp; SD</option><option>SD</option><option>TK</option></select>
+              </div>
+            </div>
+            <div class="form-group"><label for="skNama">Nama sekolah</label><input type="text" id="skNama" required></div>
+            <div class="form-group"><label for="skAlamat">Alamat</label><input type="text" id="skAlamat" required></div>
+            <div class="grid-2-col" style="gap:0 16px;">
+              <div class="form-group"><label for="skKepsek">Kepala sekolah</label><input type="text" id="skKepsek" required></div>
+              <div class="form-group"><label for="skNipKepsek">NIP kepala sekolah</label><input type="text" id="skNipKepsek"></div>
+            </div>
+            <button type="submit" class="btn btn-primary">Simpan profil</button>
+          </form>
+        </div>
+
+        <div class="card p-4">
+          <h3>Impor data</h3>
+          <p class="text-muted" style="font-size:.8125rem;">Unggah berkas CSV hasil unduhan Dapodik, atau tempel isinya langsung.</p>
+
+          <div class="form-group mt-4">
+            <label for="imporJenis">Jenis data</label>
+            <select id="imporJenis" onchange="updateImporFormat()">
+              <option value="guru">Guru &amp; tenaga kependidikan</option>
+              <option value="kelas">Rombongan belajar</option>
+              <option value="mapel">Mata pelajaran</option>
+              <option value="siswa">Peserta didik</option>
+            </select>
+          </div>
+
+          <div class="format-note mb-4">
+            <span>Kolom yang dibaca</span>
+            <code id="imporFormat">—</code>
+          </div>
+
+          <div class="form-group">
+            <label for="imporFile">Berkas CSV</label>
+            <input type="file" id="imporFile" accept=".csv,text/csv" onchange="bacaBerkasImpor(event)">
+          </div>
+
+          <div class="form-group">
+            <label for="imporTeks">Atau tempel isi CSV</label>
+            <textarea id="imporTeks" class="input" rows="6" oninput="previewImpor()"></textarea>
+          </div>
+
+          <div id="imporPreview" class="preview-box hidden mb-4"></div>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-primary" id="btnImpor" onclick="jalankanImpor()" disabled>Impor data</button>
+            <button class="btn btn-secondary" onclick="resetImpor()">Bersihkan</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card table-card mt-4">
+        <div class="p-4" style="padding-bottom:8px;"><h3>Riwayat sinkronisasi</h3></div>
+        <div class="table-responsive">
+          <table>
+            <thead><tr><th>Waktu</th><th>Jenis data</th><th>Masuk</th><th>Dilewati</th><th>Status</th></tr></thead>
+            <tbody id="tbodyDapodikLog"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ KEPEGAWAIAN ============ -->
     <div id="section-manajemen-hr" class="tab-content hidden">
       <div class="page-head">
         <div>
@@ -259,37 +385,134 @@
       <div class="card table-card">
         <div class="table-responsive">
           <table>
-            <thead>
-              <tr><th>NIP</th><th>Nama</th><th>Unit</th><th>Status</th><th>Gaji pokok</th><th>Kontak</th><th></th></tr>
-            </thead>
+            <thead><tr><th>NIP</th><th>Nama</th><th>Unit</th><th>Status</th><th>Gaji pokok</th><th>Kontak</th><th></th></tr></thead>
             <tbody id="tbodyHR"></tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- AKUN -->
+    <!-- ============ USER & AKSES ============ -->
     <div id="section-manajemen-user" class="tab-content hidden">
       <div class="page-head">
         <div>
-          <h2>Akun pengguna</h2>
-          <p>Siapa saja yang dapat masuk ke portal dan sebagai peran apa.</p>
+          <h2>User &amp; akses</h2>
+          <p>Akun login beserta penugasannya: guru mata pelajaran, wali kelas, atau guru BK.</p>
         </div>
         <div class="page-head-actions">
           <button class="btn btn-primary" onclick="openModalUser()">Tambah akun</button>
         </div>
       </div>
+
+      <div class="stat-strip mb-4">
+        <div class="stat-box stat-accent-a"><small>Wali kelas</small><span class="stat-value" id="statWali">0</span></div>
+        <div class="stat-box stat-accent-b"><small>Guru mata pelajaran</small><span class="stat-value" id="statMapel">0</span></div>
+        <div class="stat-box stat-accent-c"><small>Guru BK</small><span class="stat-value" id="statBk">0</span></div>
+      </div>
+
       <div class="card table-card">
         <div class="table-responsive">
           <table>
-            <thead><tr><th>Nama pengguna</th><th>Nama lengkap</th><th>Peran</th><th></th></tr></thead>
+            <thead><tr><th>Akun</th><th>Nama lengkap</th><th>Jenjang</th><th>Penugasan</th><th>Cakupan</th><th></th></tr></thead>
             <tbody id="tbodyUsers"></tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- AKADEMIK -->
+    <!-- ============ PENYELARASAN KURIKULUM ============ -->
+    <div id="section-kurikulum" class="tab-content hidden">
+      <div class="page-head">
+        <div>
+          <h2>Penyelarasan CP–TP</h2>
+          <p>Petakan Capaian Pembelajaran ke Tujuan Pembelajaran, dan sandingkan dengan Kompetensi Dasar Kurikulum 2013.</p>
+        </div>
+        <div class="page-head-actions">
+          <select id="kurikulumFilterMapel" class="input" style="width:auto;" onchange="renderKurikulum()"></select>
+          <button class="btn btn-secondary" onclick="openModalCP()">Tambah CP</button>
+          <button class="btn btn-primary" onclick="openModalTP()">Tambah TP</button>
+        </div>
+      </div>
+
+      <div class="stat-strip mb-4">
+        <div class="stat-box stat-accent-a"><small>Capaian Pembelajaran</small><span class="stat-value" id="statCP">0</span></div>
+        <div class="stat-box stat-accent-b"><small>Tujuan Pembelajaran</small><span class="stat-value" id="statTP">0</span></div>
+        <div class="stat-box stat-accent-c"><small>CP sudah diturunkan</small><span class="stat-value" id="statSelaras">0%</span></div>
+      </div>
+
+      <div id="kurikulumTree"></div>
+
+      <div class="card table-card mt-4">
+        <div class="p-4" style="padding-bottom:8px;">
+          <div class="card-title">
+            <h3>Padanan Kompetensi Dasar</h3>
+            <button class="btn btn-secondary btn-sm" onclick="openModalKD()">Tambah KD</button>
+          </div>
+          <p class="text-muted" style="font-size:.8125rem;">Untuk sekolah yang masih menjalankan Kurikulum 2013 secara paralel.</p>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead><tr><th>Kode KD</th><th>Deskripsi</th><th>Disandingkan dengan CP</th><th></th></tr></thead>
+            <tbody id="tbodyKD"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ LEGER & PENGUNCIAN ============ -->
+    <div id="section-leger" class="tab-content hidden">
+      <div class="page-head no-print">
+        <div>
+          <h2>Leger &amp; penguncian nilai</h2>
+          <p>Tetapkan tenggat input nilai, kunci datanya, lalu cetak leger penilaian sekolah.</p>
+        </div>
+        <div class="page-head-actions">
+          <select id="legerKelas" class="input" style="width:auto;" onchange="renderLeger()"></select>
+          <button class="btn btn-secondary" onclick="cetakLeger()">Cetak leger</button>
+        </div>
+      </div>
+
+      <div class="card p-4 mb-4 no-print">
+        <div class="card-title"><h3>Periode penilaian</h3><span class="badge-role" id="legerStatusTag">—</span></div>
+        <div class="grid-2-col mt-4" style="gap:0 16px;">
+          <div class="form-group"><label for="setTahun">Tahun ajaran</label><input type="text" id="setTahun" placeholder="2026/2027"></div>
+          <div class="form-group"><label for="setSemester">Semester</label>
+            <select id="setSemester"><option>Ganjil</option><option>Genap</option></select>
+          </div>
+        </div>
+        <div class="grid-2-col" style="gap:0 16px;">
+          <div class="form-group"><label for="setDeadline">Tenggat input nilai</label><input type="date" id="setDeadline">
+            <p class="field-hint">Lewat tanggal ini sistem mengingatkan, lalu nilai bisa dikunci.</p>
+          </div>
+          <div class="form-group"><label for="setBobot">Bobot nilai akhir</label>
+            <select id="setBobot">
+              <option value="30">30% formatif · 70% sumatif</option>
+              <option value="40">40% formatif · 60% sumatif</option>
+              <option value="50">50% formatif · 50% sumatif</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="savePengaturanNilai()">Simpan pengaturan</button>
+          <button class="btn btn-danger" id="btnKunci" onclick="toggleKunciNilai()">Kunci nilai</button>
+        </div>
+      </div>
+
+      <div id="legerKop" class="leger-kop"></div>
+
+      <div class="card table-card">
+        <div class="table-responsive">
+          <table id="tableLeger">
+            <thead id="theadLeger"></thead>
+            <tbody id="tbodyLeger"></tbody>
+          </table>
+        </div>
+      </div>
+      <p class="text-muted mt-2 no-print" style="font-size:.75rem;">Nilai akhir menggabungkan rata-rata formatif dan sumatif sesuai bobot. Capaian non-angka seperti BSB tidak ikut dihitung.</p>
+      <div id="legerTtd" class="leger-ttd hidden"></div>
+    </div>
+
+    <!-- ============ MAPEL & NILAI ============ -->
     <div id="section-manajemen-pembelajaran" class="tab-content hidden">
       <div class="page-head">
         <div>
@@ -307,17 +530,26 @@
           <div class="p-4" style="padding-bottom:8px;"><h3>Mata pelajaran</h3></div>
           <div class="table-responsive">
             <table>
-              <thead><tr><th>Kode</th><th>Nama</th><th>Jenjang</th><th></th></tr></thead>
+              <thead><tr><th>Kode</th><th>Nama</th><th>Jenjang</th><th>TP</th><th></th></tr></thead>
               <tbody id="tbodyMapel"></tbody>
             </table>
           </div>
         </div>
 
         <div class="card table-card">
-          <div class="p-4" style="padding-bottom:8px;"><h3>Rekam penilaian</h3></div>
+          <div class="p-4" style="padding-bottom:8px;">
+            <div class="card-title">
+              <h3>Rekam penilaian</h3>
+              <select id="nilaiFilterJenis" class="select-inline" onchange="renderPembelajaran()">
+                <option value="">Semua jenis</option>
+                <option value="formatif">Formatif</option>
+                <option value="sumatif">Sumatif</option>
+              </select>
+            </div>
+          </div>
           <div class="table-responsive">
             <table>
-              <thead><tr><th>Murid</th><th>Mapel</th><th>Capaian</th><th></th></tr></thead>
+              <thead><tr><th>Murid</th><th>Mapel</th><th>Jenis</th><th>Nilai</th><th></th></tr></thead>
               <tbody id="tbodyNilai"></tbody>
             </table>
           </div>
@@ -325,13 +557,104 @@
       </div>
     </div>
 
-    <!-- MURID TK -->
-    <div id="section-siswa-tk" class="tab-content hidden">
+    <!-- ============ DESKRIPSI AKADEMIK ============ -->
+    <div id="section-deskripsi" class="tab-content hidden">
       <div class="page-head">
         <div>
-          <h2>Murid TK</h2>
-          <p>Kelompok A dan B beserta data wali.</p>
+          <h2>Deskripsi akademik</h2>
+          <p>Draf kalimat rapor disusun otomatis dari TP dan nilai akhir tiap murid. Sunting sebelum dicetak.</p>
         </div>
+        <div class="page-head-actions">
+          <select id="deskripsiMapel" class="input" style="width:auto;" onchange="renderDeskripsi()"></select>
+          <button class="btn btn-primary" onclick="susunSemuaDeskripsi()">Susun ulang semua draf</button>
+        </div>
+      </div>
+
+      <div class="card table-card">
+        <div class="table-responsive">
+          <table>
+            <thead><tr><th>Murid</th><th>Nilai akhir</th><th>Deskripsi</th><th>Status</th><th></th></tr></thead>
+            <tbody id="tbodyDeskripsi"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SIKAP & CATATAN WALI ============ -->
+    <div id="section-sikap" class="tab-content hidden">
+      <div class="page-head">
+        <div>
+          <h2>Sikap &amp; catatan wali kelas</h2>
+          <p id="sikapScope">Penilaian sikap spiritual, sikap sosial, dan catatan naratif wali kelas.</p>
+        </div>
+        <div class="page-head-actions">
+          <input type="text" class="search-input" placeholder="Cari nama murid" oninput="renderSikap(this.value)">
+        </div>
+      </div>
+
+      <div class="card table-card">
+        <div class="table-responsive">
+          <table>
+            <thead><tr><th>Murid</th><th>Sikap spiritual</th><th>Sikap sosial</th><th>Catatan wali</th><th></th></tr></thead>
+            <tbody id="tbodySikap"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ P5 ============ -->
+    <div id="section-p5" class="tab-content hidden">
+      <div class="page-head">
+        <div>
+          <h2>Penilaian P5</h2>
+          <p>Projek Penguatan Profil Pelajar Pancasila — capaian per dimensi untuk setiap murid.</p>
+        </div>
+        <div class="page-head-actions">
+          <select id="p5FilterProjek" class="input" style="width:auto;" onchange="renderP5()"></select>
+          <button class="btn btn-secondary" onclick="openModalProjek()">Tambah projek</button>
+          <button class="btn btn-primary" onclick="openModalP5()">Input capaian</button>
+        </div>
+      </div>
+
+      <div id="p5ProjekInfo" class="card p-4 mb-4 hidden"></div>
+
+      <div class="card table-card">
+        <div class="table-responsive">
+          <table>
+            <thead><tr><th>Murid</th><th>Dimensi</th><th>Capaian</th><th>Catatan proses</th><th></th></tr></thead>
+            <tbody id="tbodyP5"></tbody>
+          </table>
+        </div>
+      </div>
+      <p class="text-muted mt-2" style="font-size:.75rem;">BB Belum Berkembang · MB Mulai Berkembang · BSH Berkembang Sesuai Harapan · SB Sangat Berkembang.</p>
+    </div>
+
+    <!-- ============ EKSTRAKURIKULER ============ -->
+    <div id="section-ekskul" class="tab-content hidden">
+      <div class="page-head">
+        <div>
+          <h2>Ekstrakurikuler</h2>
+          <p>Kegiatan yang diikuti murid beserta predikat dan keterangan pembina.</p>
+        </div>
+        <div class="page-head-actions">
+          <button class="btn btn-primary" onclick="openModalEkskul()">Catat kegiatan</button>
+        </div>
+      </div>
+
+      <div class="card table-card">
+        <div class="table-responsive">
+          <table>
+            <thead><tr><th>Murid</th><th>Kegiatan</th><th>Predikat</th><th>Keterangan</th><th></th></tr></thead>
+            <tbody id="tbodyEkskul"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ MURID TK ============ -->
+    <div id="section-siswa-tk" class="tab-content hidden">
+      <div class="page-head">
+        <div><h2>Murid TK</h2><p>Kelompok A dan B beserta data wali.</p></div>
         <div class="page-head-actions">
           <input type="text" class="search-input" placeholder="Cari nama atau NIS" oninput="filterSiswaTable('TK', this.value)">
           <button class="btn btn-primary" onclick="openModalSiswa('TK')">Tambah murid</button>
@@ -347,13 +670,10 @@
       </div>
     </div>
 
-    <!-- MURID SD -->
+    <!-- ============ MURID SD ============ -->
     <div id="section-siswa-sd" class="tab-content hidden">
       <div class="page-head">
-        <div>
-          <h2>Murid SD</h2>
-          <p>Kelas 1 sampai 6 beserta data wali.</p>
-        </div>
+        <div><h2>Murid SD</h2><p id="siswaSdScope">Kelas 1 sampai 6 beserta data wali.</p></div>
         <div class="page-head-actions">
           <input type="text" class="search-input" placeholder="Cari nama atau NISN" oninput="filterSiswaTable('SD', this.value)">
           <button class="btn btn-primary" onclick="openModalSiswa('SD')">Tambah murid</button>
@@ -369,13 +689,10 @@
       </div>
     </div>
 
-    <!-- ABSENSI -->
+    <!-- ============ ABSENSI ============ -->
     <div id="section-absensi" class="tab-content hidden">
       <div class="page-head">
-        <div>
-          <h2>Absensi harian</h2>
-          <p id="absensiScope">Perubahan tersimpan otomatis.</p>
-        </div>
+        <div><h2>Absensi harian</h2><p id="absensiScope">Perubahan tersimpan otomatis.</p></div>
         <div class="page-head-actions">
           <button class="btn btn-secondary" onclick="markAllPresent()">Tandai semua hadir</button>
           <input type="date" id="filterTanggalAbsensi" class="input" style="width:auto;" onchange="renderAbsensi()">
@@ -391,28 +708,21 @@
       </div>
     </div>
 
-    <!-- GOOGLE SHEETS -->
+    <!-- ============ GOOGLE SHEETS ============ -->
     <div id="section-rekap-absensi-gas" class="tab-content hidden">
       <div class="page-head">
-        <div>
-          <h2>Rekap Google Sheets</h2>
-          <p>Ditarik langsung dari spreadsheet yang dipublikasikan sekolah.</p>
-        </div>
+        <div><h2>Rekap Google Sheets</h2><p>Ditarik langsung dari spreadsheet yang dipublikasikan sekolah.</p></div>
         <div class="page-head-actions">
           <button class="btn btn-primary" id="btnSyncSheet" onclick="fetchGoogleSheetAttendance()">Tarik data</button>
         </div>
       </div>
-
       <div class="card table-card">
         <div id="loadingSheet" class="hidden loading-container">
           <div class="loading-spinner"></div>
           <p>Mengambil data spreadsheet…</p>
         </div>
         <div class="table-responsive">
-          <table>
-            <thead id="theadGAS"></thead>
-            <tbody id="tbodyGAS"></tbody>
-          </table>
+          <table><thead id="theadGAS"></thead><tbody id="tbodyGAS"></tbody></table>
         </div>
       </div>
     </div>
@@ -423,7 +733,7 @@
 <!-- ======================= MODAL ======================= -->
 
 <div id="modalStudentProfile" class="modal-backdrop hidden" data-modal role="dialog" aria-modal="true">
-  <div class="modal-card" style="max-width:580px;">
+  <div class="modal-card" style="max-width:600px;">
     <div class="profile-head">
       <img id="profileAvatar" src="" class="user-avatar" alt="">
       <div>
@@ -441,12 +751,14 @@
     </div>
 
     <h4 class="mb-2">Riwayat penilaian</h4>
-    <div class="table-responsive card table-card">
+    <div class="table-responsive card table-card mb-4">
       <table>
-        <thead><tr><th>Mata pelajaran</th><th>Capaian</th><th>Catatan</th></tr></thead>
+        <thead><tr><th>Mata pelajaran</th><th>Jenis</th><th>Nilai</th><th>Catatan</th></tr></thead>
         <tbody id="profileTbodyNilai"></tbody>
       </table>
     </div>
+
+    <div id="profileExtra"></div>
 
     <div class="modal-actions">
       <button type="button" class="btn btn-secondary" onclick="closeModalStudentProfile()">Tutup</button>
@@ -464,20 +776,11 @@
         <div class="form-group"><label for="hrNama">Nama lengkap</label><input type="text" id="hrNama" required></div>
       </div>
       <div class="grid-2-col" style="gap:0 16px;">
-        <div class="form-group">
-          <label for="hrDept">Unit</label>
-          <select id="hrDept" required>
-            <option value="Guru SD">Guru SD</option>
-            <option value="Guru TK">Guru TK</option>
-            <option value="Administrasi">Administrasi</option>
-          </select>
+        <div class="form-group"><label for="hrDept">Unit</label>
+          <select id="hrDept" required><option value="Guru SD">Guru SD</option><option value="Guru TK">Guru TK</option><option value="Administrasi">Administrasi</option></select>
         </div>
-        <div class="form-group">
-          <label for="hrStatus">Status</label>
-          <select id="hrStatus" required>
-            <option value="Tetap">Tetap</option>
-            <option value="Kontrak">Kontrak</option>
-          </select>
+        <div class="form-group"><label for="hrStatus">Status</label>
+          <select id="hrStatus" required><option value="Tetap">Tetap</option><option value="Kontrak">Kontrak</option></select>
         </div>
       </div>
       <div class="grid-2-col" style="gap:0 16px;">
@@ -495,16 +798,13 @@
 <div id="modalMapel" class="modal-backdrop hidden" data-modal role="dialog" aria-modal="true">
   <div class="modal-card">
     <h2>Tambah mata pelajaran</h2>
-    <p class="modal-sub">Kode dipakai sebagai penanda singkat di jadwal dan penilaian.</p>
+    <p class="modal-sub">Kode dipakai sebagai penanda singkat di jadwal, penilaian, dan leger.</p>
     <form id="formMapel" onsubmit="saveMapel(event)">
       <div class="form-group"><label for="mapelKode">Kode</label><input type="text" id="mapelKode" placeholder="SD-IPA" required></div>
       <div class="form-group"><label for="mapelNama">Nama mata pelajaran</label><input type="text" id="mapelNama" placeholder="IPAS Integrasi" required></div>
       <div class="form-group" id="mapelJenjangGroup">
         <label for="mapelRole">Jenjang</label>
-        <select id="mapelRole" required>
-          <option value="guru_tk">TK</option>
-          <option value="guru_sd">SD</option>
-        </select>
+        <select id="mapelRole" required><option value="guru_tk">TK</option><option value="guru_sd">SD</option></select>
       </div>
       <div class="modal-actions">
         <button type="button" class="btn btn-secondary" onclick="closeModalMapel()">Batal</button>
@@ -517,12 +817,23 @@
 <div id="modalNilai" class="modal-backdrop hidden" data-modal role="dialog" aria-modal="true">
   <div class="modal-card">
     <h2>Input penilaian</h2>
-    <p class="modal-sub">Pilih mata pelajaran dulu — daftar murid menyesuaikan jenjangnya.</p>
+    <p class="modal-sub">Pilih mata pelajaran dulu — daftar murid dan TP menyesuaikan.</p>
     <form id="formNilai" onsubmit="saveNilai(event)">
-      <div class="form-group"><label for="nilaiMapelSelect">Mata pelajaran</label><select id="nilaiMapelSelect" required onchange="syncNilaiSiswaOptions()"></select></div>
+      <div class="grid-2-col" style="gap:0 16px;">
+        <div class="form-group"><label for="nilaiMapelSelect">Mata pelajaran</label><select id="nilaiMapelSelect" required onchange="syncNilaiSiswaOptions()"></select></div>
+        <div class="form-group"><label for="nilaiJenis">Jenis penilaian</label>
+          <select id="nilaiJenis" required><option value="formatif">Formatif</option><option value="sumatif">Sumatif</option></select>
+        </div>
+      </div>
       <div class="form-group"><label for="nilaiSiswaSelect">Murid</label><select id="nilaiSiswaSelect" required></select></div>
-      <div class="form-group"><label for="nilaiAngka">Capaian</label><input type="text" id="nilaiAngka" placeholder="85 atau BSB" required></div>
-      <div class="form-group"><label for="nilaiCatatan">Catatan</label><input type="text" id="nilaiCatatan" placeholder="Perkembangan sudah sesuai target" required></div>
+      <div class="form-group"><label for="nilaiTpSelect">Tujuan Pembelajaran (opsional)</label><select id="nilaiTpSelect"></select>
+        <p class="field-hint">Menautkan nilai ke TP membuat draf deskripsi rapor lebih tepat.</p>
+      </div>
+      <div class="grid-2-col" style="gap:0 16px;">
+        <div class="form-group"><label for="nilaiAngka">Nilai</label><input type="text" id="nilaiAngka" placeholder="85 atau BSB" required></div>
+        <div class="form-group"><label for="nilaiTanggal">Tanggal</label><input type="date" id="nilaiTanggal"></div>
+      </div>
+      <div class="form-group"><label for="nilaiCatatan">Catatan</label><input type="text" id="nilaiCatatan" placeholder="Sudah menguasai konsep dasar" required></div>
       <div class="modal-actions">
         <button type="button" class="btn btn-secondary" onclick="closeModalNilai()">Batal</button>
         <button type="submit" class="btn btn-primary">Simpan nilai</button>
@@ -533,23 +844,49 @@
 
 <div id="modalUser" class="modal-backdrop hidden" data-modal role="dialog" aria-modal="true">
   <div class="modal-card">
-    <h2>Tambah akun</h2>
-    <p class="modal-sub">Peran menentukan menu apa saja yang terlihat setelah masuk.</p>
+    <h2 id="modalUserTitle">Tambah akun</h2>
+    <p class="modal-sub">Jenjang menentukan menu yang terlihat. Penugasan menentukan kelas atau mapel yang boleh disentuh.</p>
     <form id="formUser" onsubmit="saveUser(event)">
-      <div class="form-group"><label for="userInputUsername">Nama pengguna</label><input type="text" id="userInputUsername" autocomplete="off" required></div>
-      <div class="form-group"><label for="userInputPassword">Kata sandi</label><input type="password" id="userInputPassword" autocomplete="new-password" minlength="5" required><p class="field-hint">Minimal 5 karakter.</p></div>
-      <div class="form-group"><label for="userInputNama">Nama lengkap</label><input type="text" id="userInputNama" required></div>
-      <div class="form-group">
-        <label for="userInputRole">Peran</label>
-        <select id="userInputRole" required>
-          <option value="admin">Admin</option>
-          <option value="guru_tk">Guru TK</option>
-          <option value="guru_sd">Guru SD</option>
-        </select>
+      <input type="hidden" id="userEditKey">
+      <div class="grid-2-col" style="gap:0 16px;">
+        <div class="form-group"><label for="userInputUsername">Nama pengguna</label><input type="text" id="userInputUsername" autocomplete="off" required></div>
+        <div class="form-group"><label for="userInputNama">Nama lengkap</label><input type="text" id="userInputNama" required></div>
       </div>
+      <div class="form-group"><label for="userInputPassword">Kata sandi</label><input type="password" id="userInputPassword" autocomplete="new-password" minlength="5" required>
+        <p class="field-hint" id="userPassHint">Minimal 5 karakter.</p>
+      </div>
+      <div class="grid-2-col" style="gap:0 16px;">
+        <div class="form-group"><label for="userInputRole">Jenjang / peran</label>
+          <select id="userInputRole" required onchange="syncTugasOptions()">
+            <option value="admin">Administrator</option>
+            <option value="guru_tk">Guru TK</option>
+            <option value="guru_sd">Guru SD</option>
+          </select>
+        </div>
+        <div class="form-group"><label for="userInputTugas">Penugasan</label>
+          <select id="userInputTugas" onchange="syncTugasOptions()">
+            <option value="none">Tanpa penugasan khusus</option>
+            <option value="wali_kelas">Wali kelas</option>
+            <option value="guru_mapel">Guru mata pelajaran</option>
+            <option value="guru_bk">Guru BK</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group hidden" id="tugasKelasGroup">
+        <label for="userTugasKelas">Kelas yang diampu</label>
+        <select id="userTugasKelas"></select>
+      </div>
+
+      <div class="form-group hidden" id="tugasMapelGroup">
+        <label for="userTugasMapel">Mata pelajaran yang diampu</label>
+        <select id="userTugasMapel" multiple size="5"></select>
+        <p class="field-hint">Tahan Ctrl (atau Cmd) untuk memilih lebih dari satu.</p>
+      </div>
+
       <div class="modal-actions">
         <button type="button" class="btn btn-secondary" onclick="closeModalUser()">Batal</button>
-        <button type="submit" class="btn btn-primary">Buat akun</button>
+        <button type="submit" class="btn btn-primary" id="btnSimpanUser">Buat akun</button>
       </div>
     </form>
   </div>
@@ -563,7 +900,7 @@
       <input type="hidden" id="siswaTingkat">
       <div class="grid-2-col" style="gap:0 16px;">
         <div class="form-group"><label for="siswaNis">Nomor induk</label><input type="text" id="siswaNis" required></div>
-        <div class="form-group"><label for="siswaKelas">Kelas / kelompok</label><input type="text" id="siswaKelas" required></div>
+        <div class="form-group"><label for="siswaKelas">Kelas / kelompok</label><select id="siswaKelas" required></select></div>
       </div>
       <div class="form-group"><label for="siswaNama">Nama lengkap</label><input type="text" id="siswaNama" required></div>
       <div class="grid-2-col" style="gap:0 16px;">
@@ -573,6 +910,183 @@
       <div class="modal-actions">
         <button type="button" class="btn btn-secondary" onclick="closeModalSiswa()">Batal</button>
         <button type="submit" class="btn btn-primary">Simpan murid</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modalCP" class="modal-backdrop hidden" data-modal role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <h2>Capaian Pembelajaran</h2>
+    <p class="modal-sub">CP adalah kompetensi akhir satu fase. Turunkan menjadi beberapa TP setelah disimpan.</p>
+    <form id="formCP" onsubmit="saveCP(event)">
+      <div class="grid-2-col" style="gap:0 16px;">
+        <div class="form-group"><label for="cpMapel">Mata pelajaran</label><select id="cpMapel" required></select></div>
+        <div class="form-group"><label for="cpFase">Fase</label>
+          <select id="cpFase" required>
+            <option value="Fondasi">Fondasi (TK)</option>
+            <option value="A">A (kelas 1–2)</option>
+            <option value="B">B (kelas 3–4)</option>
+            <option value="C">C (kelas 5–6)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label for="cpElemen">Elemen</label><input type="text" id="cpElemen" placeholder="Bilangan" required></div>
+      <div class="form-group"><label for="cpDeskripsi">Rumusan capaian</label><textarea id="cpDeskripsi" class="input" rows="4" placeholder="Peserta didik mampu…" required></textarea></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModalCP()">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan CP</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modalTP" class="modal-backdrop hidden" data-modal role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <h2>Tujuan Pembelajaran</h2>
+    <p class="modal-sub">TP adalah penjabaran operasional satu CP, sekaligus dasar deskripsi rapor.</p>
+    <form id="formTP" onsubmit="saveTP(event)">
+      <div class="form-group"><label for="tpCp">Turunan dari CP</label><select id="tpCp" required></select></div>
+      <div class="grid-2-col" style="gap:0 16px;">
+        <div class="form-group"><label for="tpKode">Kode TP</label><input type="text" id="tpKode" placeholder="TP-1.1" required></div>
+        <div class="form-group"><label for="tpAlokasi">Alokasi (JP)</label><input type="number" id="tpAlokasi" min="1" value="4"></div>
+      </div>
+      <div class="form-group"><label for="tpDeskripsi">Rumusan tujuan</label><textarea id="tpDeskripsi" class="input" rows="3" placeholder="Murid dapat…" required></textarea></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModalTP()">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan TP</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modalKD" class="modal-backdrop hidden" data-modal role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <h2>Padanan Kompetensi Dasar</h2>
+    <p class="modal-sub">Sandingkan KD Kurikulum 2013 dengan CP Kurikulum Merdeka yang setara.</p>
+    <form id="formKD" onsubmit="saveKD(event)">
+      <div class="form-group"><label for="kdKode">Kode KD</label><input type="text" id="kdKode" placeholder="3.1" required></div>
+      <div class="form-group"><label for="kdDeskripsi">Deskripsi KD</label><textarea id="kdDeskripsi" class="input" rows="3" required></textarea></div>
+      <div class="form-group"><label for="kdCp">Disandingkan dengan CP</label><select id="kdCp" required></select></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModalKD()">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan padanan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modalSikap" class="modal-backdrop hidden" data-modal role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <h2>Sikap &amp; catatan wali</h2>
+    <p class="modal-sub" id="sikapSub">—</p>
+    <form id="formSikap" onsubmit="saveSikap(event)">
+      <input type="hidden" id="sikapNis">
+      <div class="grid-2-col" style="gap:0 16px;">
+        <div class="form-group"><label for="sikapSpiritual">Sikap spiritual</label><select id="sikapSpiritual" required></select></div>
+        <div class="form-group"><label for="sikapSosial">Sikap sosial</label><select id="sikapSosial" required></select></div>
+      </div>
+      <div class="form-group"><label for="sikapDeskSpiritual">Deskripsi sikap spiritual</label><textarea id="sikapDeskSpiritual" class="input" rows="2" placeholder="Terbiasa berdoa sebelum dan sesudah kegiatan…"></textarea></div>
+      <div class="form-group"><label for="sikapDeskSosial">Deskripsi sikap sosial</label><textarea id="sikapDeskSosial" class="input" rows="2" placeholder="Menunjukkan tanggung jawab dalam kerja kelompok…"></textarea></div>
+      <div class="form-group"><label for="sikapCatatan">Catatan wali kelas</label><textarea id="sikapCatatan" class="input" rows="3" placeholder="Catatan naratif untuk orang tua…"></textarea>
+        <p class="field-hint">Tampil di rapor sebagai catatan wali kelas.</p>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModalSikap()">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modalProjek" class="modal-backdrop hidden" data-modal role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <h2>Projek P5</h2>
+    <p class="modal-sub">Satu projek dapat menyasar beberapa dimensi profil pelajar Pancasila.</p>
+    <form id="formProjek" onsubmit="saveProjek(event)">
+      <div class="form-group"><label for="projekNama">Nama projek</label><input type="text" id="projekNama" placeholder="Panen Sampah Organik" required></div>
+      <div class="form-group"><label for="projekTema">Tema</label>
+        <select id="projekTema" required>
+          <option>Gaya Hidup Berkelanjutan</option>
+          <option>Kearifan Lokal</option>
+          <option>Bhinneka Tunggal Ika</option>
+          <option>Bangunlah Jiwa dan Raganya</option>
+          <option>Suara Demokrasi</option>
+          <option>Rekayasa dan Teknologi</option>
+          <option>Kewirausahaan</option>
+        </select>
+      </div>
+      <div class="form-group"><label for="projekDimensi">Dimensi yang disasar</label><select id="projekDimensi" multiple size="6"></select></div>
+      <div class="form-group"><label for="projekDeskripsi">Deskripsi singkat</label><textarea id="projekDeskripsi" class="input" rows="2"></textarea></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModalProjek()">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan projek</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modalP5" class="modal-backdrop hidden" data-modal role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <h2>Capaian P5</h2>
+    <p class="modal-sub">Catat perkembangan murid pada satu dimensi dalam projek berjalan.</p>
+    <form id="formP5" onsubmit="saveP5(event)">
+      <div class="form-group"><label for="p5Projek">Projek</label><select id="p5Projek" required onchange="syncP5Dimensi()"></select></div>
+      <div class="form-group"><label for="p5Siswa">Murid</label><select id="p5Siswa" required></select></div>
+      <div class="grid-2-col" style="gap:0 16px;">
+        <div class="form-group"><label for="p5Dimensi">Dimensi</label><select id="p5Dimensi" required></select></div>
+        <div class="form-group"><label for="p5Capaian">Capaian</label><select id="p5Capaian" required></select></div>
+      </div>
+      <div class="form-group"><label for="p5Catatan">Catatan proses</label><textarea id="p5Catatan" class="input" rows="3" placeholder="Apa yang dilakukan murid selama projek…" required></textarea></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModalP5()">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan capaian</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modalEkskul" class="modal-backdrop hidden" data-modal role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <h2>Ekstrakurikuler</h2>
+    <p class="modal-sub">Predikat dan keterangan akan tercetak di halaman rapor.</p>
+    <form id="formEkskul" onsubmit="saveEkskul(event)">
+      <div class="form-group"><label for="ekskulSiswa">Murid</label><select id="ekskulSiswa" required></select></div>
+      <div class="grid-2-col" style="gap:0 16px;">
+        <div class="form-group"><label for="ekskulKegiatan">Kegiatan</label>
+          <input type="text" id="ekskulKegiatan" list="daftarEkskul" placeholder="Pramuka" required>
+          <datalist id="daftarEkskul">
+            <option>Pramuka</option><option>Futsal</option><option>Tari Tradisional</option>
+            <option>Seni Musik</option><option>Tahfiz</option><option>Dokter Kecil</option>
+            <option>Bahasa Inggris</option><option>Renang</option>
+          </datalist>
+        </div>
+        <div class="form-group"><label for="ekskulPredikat">Predikat</label><select id="ekskulPredikat" required></select></div>
+      </div>
+      <div class="form-group"><label for="ekskulKeterangan">Keterangan pembina</label><textarea id="ekskulKeterangan" class="input" rows="3" placeholder="Aktif mengikuti latihan rutin dan…" required></textarea></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModalEkskul()">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modalDeskripsi" class="modal-backdrop hidden" data-modal role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <h2>Deskripsi akademik</h2>
+    <p class="modal-sub" id="deskripsiSub">—</p>
+    <form id="formDeskripsi" onsubmit="saveDeskripsi(event)">
+      <input type="hidden" id="deskripsiNis">
+      <input type="hidden" id="deskripsiMapelKode">
+      <div id="deskripsiRujukan" class="preview-box mb-4"></div>
+      <div class="form-group"><label for="deskripsiTeks">Kalimat rapor</label><textarea id="deskripsiTeks" class="input" rows="5" required></textarea>
+        <p class="field-hint">Draf disusun dari TP yang dinilai dan nilai akhir murid. Sunting sesuai gaya bahasa sekolah.</p>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModalDeskripsi()">Batal</button>
+        <button type="button" class="btn btn-secondary" onclick="susunUlangSatu()">Susun ulang draf</button>
+        <button type="submit" class="btn btn-primary">Simpan deskripsi</button>
       </div>
     </form>
   </div>
