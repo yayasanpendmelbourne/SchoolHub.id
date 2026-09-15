@@ -179,7 +179,8 @@ img { display: block; }
 
 .input,
 .form-group input,
-.form-group select {
+.form-group select,
+.form-group textarea {
     width: 100%;
     padding: 11px 14px;
     border: 1px solid var(--line-strong);
@@ -188,7 +189,30 @@ img { display: block; }
     font-size: .9375rem;
     transition: border-color .15s var(--ease), box-shadow .15s var(--ease);
 }
-.form-group select {
+.form-group select[multiple] {
+    background-image: none;
+    padding: 6px;
+}
+.form-group select[multiple] option { padding: 6px 8px; border-radius: 5px; }
+.form-group textarea { resize: vertical; min-height: 72px; line-height: 1.55; }
+.form-group input[type="file"] {
+    padding: 8px 10px;
+    font-size: .8125rem;
+    color: var(--text-2);
+    cursor: pointer;
+}
+.form-group input[type="file"]::file-selector-button {
+    margin-right: 10px;
+    padding: 6px 12px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-xs);
+    background: var(--paper);
+    font: inherit;
+    font-size: .8125rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.form-group select:not([multiple]) {
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' stroke='%2356657a' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
@@ -197,7 +221,8 @@ img { display: block; }
 }
 .input:focus,
 .form-group input:focus,
-.form-group select:focus {
+.form-group select:focus,
+.form-group textarea:focus {
     outline: none;
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(14, 111, 102, .14);
@@ -676,7 +701,136 @@ tr:hover td.empty-state { background: transparent; }
     .modal-actions .btn { width: 100%; }
 }
 
+/* ==========================================================================
+   12. KOMPONEN MODUL LANJUTAN
+   ========================================================================== */
+
+/* Catatan format impor Dapodik */
+.format-note {
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--r-sm);
+    padding: 11px 13px;
+    background: var(--paper);
+}
+.format-note span { display: block; font-size: .75rem; color: var(--text-2); margin-bottom: 5px; }
+.format-note code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: .78rem;
+    color: var(--accent-hover);
+    word-break: break-all;
+}
+
+/* Pratinjau impor & rujukan deskripsi */
+.preview-box {
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--r-sm);
+    background: var(--paper);
+    padding: 13px 15px;
+    font-size: .8125rem;
+    color: var(--text-2);
+}
+.preview-box strong { color: var(--text); }
+.preview-box ul { list-style: none; margin-top: 7px; display: grid; gap: 4px; }
+.preview-box li::before { content: '·'; margin-right: 7px; color: var(--text-3); }
+.preview-box.is-error { border-left-color: var(--danger); }
+
+/* Pohon CP → TP */
+.cp-block {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    box-shadow: var(--sh-1);
+    margin-bottom: 14px;
+    overflow: hidden;
+}
+.cp-head { padding: 16px 20px; border-bottom: 1px solid var(--line); }
+.cp-head-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 7px; }
+.cp-head p { font-size: .875rem; color: var(--text-2); max-width: 78ch; }
+.cp-tp-list { padding: 6px 20px 14px; }
+.tp-row {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--line);
+}
+.tp-row:last-child { border-bottom: none; }
+.tp-row .badge-time { margin-top: 1px; }
+.tp-row p { font-size: .875rem; }
+.tp-row small { color: var(--text-3); font-size: .75rem; }
+.tp-row .row-actions { margin-left: auto; }
+.cp-empty { padding: 14px 20px 18px; font-size: .8125rem; color: var(--text-2); }
+
+.tag-lock { background: #fdecea; color: var(--danger); border-color: rgba(192,57,47,.2); }
+.tag-warn { background: var(--tk-soft); color: var(--tk); border-color: rgba(180,83,9,.2); }
+
+/* Sel nilai leger */
+.leger-nilai { font-variant-numeric: tabular-nums; font-weight: 600; }
+.leger-nilai.is-kosong { color: var(--text-3); font-weight: 400; }
+.leger-nilai.is-rendah { color: var(--danger); }
+
+/* Kop & tanda tangan leger, hanya berguna saat dicetak */
+.leger-kop { display: none; }
+.leger-ttd { display: none; }
+
+/* Deskripsi panjang tetap terbaca */
+td .desc-cell {
+    display: block;
+    max-width: 46ch;
+    white-space: normal;
+    color: var(--text-2);
+    font-size: .8125rem;
+    line-height: 1.5;
+}
+td .note-cell { display: block; max-width: 34ch; white-space: normal; }
+
+.progress-row { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+.progress-row:last-child { border-bottom: none; }
+.progress-row span:first-child { flex: 0 0 170px; font-size: .875rem; }
+.progress-bar { flex: 1; height: 7px; border-radius: var(--r-pill); background: var(--line); overflow: hidden; }
+.progress-bar i { display: block; height: 100%; border-radius: var(--r-pill); background: var(--accent); }
+.progress-row b { font-size: .8125rem; font-variant-numeric: tabular-nums; min-width: 58px; text-align: right; }
+
+/* ==========================================================================
+   13. CETAK
+   ========================================================================== */
 @media print {
-    .sidebar, .top-nav-bar, .page-head-actions, .btn { display: none !important; }
-    .content, body { background: #fff; }
+    @page { size: A4 landscape; margin: 14mm; }
+
+    body { background: #fff; font-size: 11px; }
+    .sidebar, .sidebar-scrim, .top-nav-bar, .no-print,
+    .btn, .toast, .modal-backdrop, .page-head-actions { display: none !important; }
+
+    .tab-content { padding: 0; }
+    .card, .table-card { border: none; box-shadow: none; border-radius: 0; }
+    .table-responsive { overflow: visible; }
+
+    th, td { padding: 5px 8px; font-size: 10px; border-bottom: 1px solid #c9d1da; }
+    th { background: #eef1f4 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    tbody tr:hover td { background: transparent; }
+    .badge-role { border: none; padding: 0; background: none !important; color: #16212e; }
+
+    .leger-kop {
+        display: block;
+        text-align: center;
+        border-bottom: 2px solid #16212e;
+        padding-bottom: 10px;
+        margin-bottom: 14px;
+    }
+    .leger-kop h2 { font-size: 15px; letter-spacing: 0; }
+    .leger-kop p { font-size: 10px; color: #41505f; margin-top: 2px; }
+    .leger-kop .leger-judul { font-size: 12px; font-weight: 700; margin-top: 9px; }
+
+    .leger-ttd {
+        display: flex !important;
+        justify-content: flex-end;
+        gap: 80px;
+        margin-top: 26px;
+        font-size: 10px;
+        page-break-inside: avoid;
+    }
+    .leger-ttd div { text-align: center; }
+    .leger-ttd .ttd-space { height: 46px; }
+    .leger-ttd b { font-weight: 600; text-decoration: underline; }
+
+    tr { page-break-inside: avoid; }
 }
