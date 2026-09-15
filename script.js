@@ -3,6 +3,8 @@
    Bagian 1 : data induk, utilitas, hak akses, navigasi
    ========================================================================== */
 
+import * as db from './db.js';
+
 'use strict';
 
 /* --------------------------------------------------------------------------
@@ -447,44 +449,59 @@ document.addEventListener('DOMContentLoaded', () => {
     restoreSession();
 });
 
-function restoreSession() {
-    let saved = null;
-    try { saved = JSON.parse(sessionStorage.getItem('educore_session') || 'null'); } catch (_) { /* abaikan */ }
-    if (saved && usersList[saved.username] && usersList[saved.username].role === saved.role) {
-        enterPortal(saved.username, false);
+async function restoreSession() {
+    try {
+        const profil = await db.sesiAktif();
+        if (!profil) return;
+        await masukDenganProfil(profil, false);
+    } catch (err) {
+        console.warn('Gagal memuat sesi sebelumnya.', err);
     }
 }
 
 /* --------------------------------------------------------------------------
    8. MASUK & KELUAR
    -------------------------------------------------------------------------- */
-function handleLogin(e) {
+async function handleLogin(e) {
     if (e) e.preventDefault();
 
     const username = $('loginUser').value.trim().toLowerCase();
     const password = $('loginPass').value;
-    const userObj = usersList[username];
+    const tombol = $('formLogin').querySelector('button[type="submit"]');
 
-    if (!userObj || userObj.pass !== password) {
-        showToast('Nama pengguna atau kata sandi tidak cocok.', 'error');
-        $('loginPass').value = '';
-        $('loginPass').focus();
-        return;
-    }
-
-    enterPortal(username, true);
-}
-
-function enterPortal(username, announce) {
-    const userObj = usersList[username];
-    currentUser = { username, ...userObj };
+    tombol.disabled = true;
+    tombol.textContent = 'Memeriksa…';
 
     try {
-        sessionStorage.setItem('educore_session', JSON.stringify({ username, role: userObj.role }));
-    } catch (_) { /* mode privat */ }
+        const profil = await db.masuk(username, password);
+        await masukDenganProfil(profil, true);
+    } catch (err) {
+        showToast(err.message || 'Nama pengguna atau kata sandi tidak cocok.', 'error');
+        $('loginPass').value = '';
+        $('loginPass').focus();
+    } finally {
+        tombol.disabled = false;
+        tombol.textContent = 'Masuk';
+    }
+}
+
+/* Dipakai baik saat login manual maupun saat sesi lama ditemukan otomatis. */
+async function masukDenganProfil(profil, announce) {
+    currentUser = profil;
 
     $('loginPage').classList.add('hidden');
     $('mainApp').classList.remove('hidden');
+    $('greetingTitle').textContent = 'Memuat data…';
+
+    try {
+        await muatDataKeMemori();
+    } catch (err) {
+        showToast(err.message || 'Gagal memuat data dari server.', 'error');
+        $('mainApp').classList.add('hidden');
+        $('loginPage').classList.remove('hidden');
+        currentUser = null;
+        return;
+    }
 
     $('userNameDisplay').textContent = currentUser.name;
     $('userNameDisplay').title = currentUser.name;
@@ -499,14 +516,40 @@ function enterPortal(username, announce) {
     if (announce) showToast(`Berhasil masuk sebagai ${labelPenugasan(currentUser)}.`);
 }
 
+/* Mengisi seluruh array global dari Supabase. Bentuk datanya sengaja disamakan
+   dengan yang lama, jadi seluruh fungsi render* tidak perlu diubah. */
+async function muatDataKeMemori() {
+    const d = await db.muatSemua();
+
+    dataSekolah    = Object.assign({}, defaultSekolah, d.sekolah);
+    dataKelas      = d.kelas;
+    employeesList  = d.karyawan;
+    dataSiswa      = d.siswa;
+    dataMapel      = d.mapel;
+    dataCP         = d.cp;
+    dataTP         = d.tp;
+    dataKD         = d.kd;
+    dataNilai      = d.nilai;
+    dataSikap      = d.sikap;
+    dataEkskul     = d.ekskul;
+    dataProjek     = d.projek;
+    dataP5         = d.p5;
+    dataDeskripsi  = d.deskripsi;
+    absensiRecords = d.absensi;
+    dapodikLog     = d.log;
+    usersList      = d.users;
+    pengaturan     = Object.assign({}, defaultPengaturan, d.pengaturan);
+}
+
 function handleLogout() {
-    showConfirmDialog('Keluar dari portal', 'Anda akan kembali ke halaman masuk.', () => {
+    showConfirmDialog('Keluar dari portal', 'Anda akan kembali ke halaman masuk.', async () => {
+        await db.keluar();
+
         currentUser = null;
         clearInterval(clockInterval);
         clockInterval = null;
 
         if (attendanceChartInstance) { attendanceChartInstance.destroy(); attendanceChartInstance = null; }
-        try { sessionStorage.removeItem('educore_session'); } catch (_) { /* abaikan */ }
 
         closeNotifDropdown();
         closeSidebar();
@@ -1193,7 +1236,7 @@ function openModalSiswa(tingkat) {
 }
 function closeModalSiswa() { $('modalSiswa').classList.add('hidden'); $('formSiswa').reset(); }
 
-function saveSiswa(e) {
+async function saveSiswa(e) {
     e.preventDefault();
     const nis = $('siswaNis').value.trim();
 
@@ -1203,37 +1246,47 @@ function saveSiswa(e) {
         return;
     }
 
-    dataSiswa.push({
+    const murid = {
         nis,
         nama: $('siswaNama').value.trim(),
         tingkat: $('siswaTingkat').value,
         kelas: $('siswaKelas').value,
         ortu: $('siswaOrtu').value.trim(),
         hp: $('siswaHp').value.trim()
-    });
+    };
 
-    saveDataToStorage();
-    renderSiswaTables(dataSiswa);
-    renderNotifications();
-    closeModalSiswa();
-    showToast('Murid tersimpan.');
+    try {
+        const tersimpan = await db.simpan('siswa', murid);
+        dataSiswa.push(tersimpan);
+        renderSiswaTables(dataSiswa);
+        renderNotifications();
+        closeModalSiswa();
+        showToast('Murid tersimpan.');
+    } catch (err) {
+        showToast(err.message, 'error');
+    }
 }
 
 function confirmDeleteSiswa(nis) {
     const s = dataSiswa.find(item => String(item.nis) === String(nis));
-    showConfirmDialog('Hapus murid', `${s ? s.nama : nis} beserta nilai, sikap, P5, dan ekstrakurikulernya akan dihapus.`, () => {
-        dataSiswa = dataSiswa.filter(item => String(item.nis) !== String(nis));
-        dataNilai = dataNilai.filter(n => String(n.nis) !== String(nis));
-        dataEkskul = dataEkskul.filter(x => String(x.nis) !== String(nis));
-        dataP5 = dataP5.filter(x => String(x.nis) !== String(nis));
-        delete dataSikap[nis];
-        Object.keys(dataDeskripsi).forEach(k => { if (k.startsWith(`${nis}|`)) delete dataDeskripsi[k]; });
-        Object.keys(absensiRecords).forEach(d => { delete absensiRecords[d][nis]; });
+    showConfirmDialog('Hapus murid', `${s ? s.nama : nis} beserta nilai, sikap, P5, dan ekstrakurikulernya akan dihapus.`, async () => {
+        try {
+            await db.hapus('siswa', { nis });   // tabel lain ikut terhapus otomatis lewat "on delete cascade" di database
 
-        saveDataToStorage();
-        renderSiswaTables(dataSiswa);
-        renderNotifications();
-        showToast('Murid dihapus.');
+            dataSiswa = dataSiswa.filter(item => String(item.nis) !== String(nis));
+            dataNilai = dataNilai.filter(n => String(n.nis) !== String(nis));
+            dataEkskul = dataEkskul.filter(x => String(x.nis) !== String(nis));
+            dataP5 = dataP5.filter(x => String(x.nis) !== String(nis));
+            delete dataSikap[nis];
+            Object.keys(dataDeskripsi).forEach(k => { if (k.startsWith(`${nis}|`)) delete dataDeskripsi[k]; });
+            Object.keys(absensiRecords).forEach(d => { delete absensiRecords[d][nis]; });
+
+            renderSiswaTables(dataSiswa);
+            renderNotifications();
+            showToast('Murid dihapus.');
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
     }, 'Hapus');
 }
 
@@ -1329,13 +1382,25 @@ function renderAbsensi() {
     }).join('');
 }
 
-function updateAbsensi(date, nis, status) {
+async function updateAbsensi(date, nis, status) {
     if (!absensiRecords[date]) absensiRecords[date] = {};
+    const statusLama = absensiRecords[date][nis];
+
+    /* Ubah tampilan dulu supaya klik terasa langsung, baru kirim ke server. */
     if (status) absensiRecords[date][nis] = status;
     else delete absensiRecords[date][nis];
-
-    saveDataToStorage();
     renderNotifications();
+
+    try {
+        if (status) await db.simpan('absensi', { tanggal: date, nis, status }, 'tanggal,nis');
+        else await db.hapus('absensi', { tanggal: date, nis });
+    } catch (err) {
+        /* Gagal simpan: kembalikan tampilan seperti semula dan beri tahu. */
+        if (statusLama) absensiRecords[date][nis] = statusLama;
+        else delete absensiRecords[date][nis];
+        renderAbsensi();
+        showToast(err.message, 'error');
+    }
 }
 
 function markAllPresent() {
@@ -1343,13 +1408,17 @@ function markAllPresent() {
     const murid = scopedSiswa();
     if (murid.length === 0) { showToast('Belum ada murid untuk diabsen.', 'error'); return; }
 
-    showConfirmDialog('Tandai semua hadir', `${murid.length} murid akan ditandai hadir pada ${tanggalPanjang(tanggal)}.`, () => {
-        if (!absensiRecords[tanggal]) absensiRecords[tanggal] = {};
-        murid.forEach(s => { absensiRecords[tanggal][s.nis] = 'Hadir'; });
-        saveDataToStorage();
-        renderAbsensi();
-        renderNotifications();
-        showToast('Semua murid ditandai hadir.');
+    showConfirmDialog('Tandai semua hadir', `${murid.length} murid akan ditandai hadir pada ${tanggalPanjang(tanggal)}.`, async () => {
+        try {
+            await db.simpanBanyak('absensi', murid.map(s => ({ tanggal, nis: s.nis, status: 'Hadir' })), 'tanggal,nis');
+            if (!absensiRecords[tanggal]) absensiRecords[tanggal] = {};
+            murid.forEach(s => { absensiRecords[tanggal][s.nis] = 'Hadir'; });
+            renderAbsensi();
+            renderNotifications();
+            showToast('Semua murid ditandai hadir.');
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
     }, 'Tandai hadir');
 }
 
@@ -1786,7 +1855,7 @@ function syncNilaiSiswaOptions() {
 
 function closeModalNilai() { $('modalNilai').classList.add('hidden'); $('formNilai').reset(); }
 
-function saveNilai(e) {
+async function saveNilai(e) {
     e.preventDefault();
     if (guardKunci('Input nilai')) return;
 
@@ -1796,31 +1865,39 @@ function saveNilai(e) {
     const kode = $('nilaiMapelSelect').value;
     const mapel = dataMapel.find(m => m.kode === kode);
 
-    dataNilai.push({
-        id: uid('n'),
+    const record = {
         nis,
         mapelKode: kode,
         jenis: $('nilaiJenis').value,
-        tpId: $('nilaiTpSelect').value,
+        tpId: $('nilaiTpSelect').value || null,
         nilai: $('nilaiAngka').value.trim(),
         catatan: $('nilaiCatatan').value.trim(),
-        tanggal: $('nilaiTanggal').value,
-        role: mapel ? mapel.role : currentUser.role
-    });
+        tanggal: $('nilaiTanggal').value || null,
+        periode: `${pengaturan.semester} ${pengaturan.tahun}`
+    };
 
-    saveDataToStorage();
-    renderPembelajaran();
-    closeModalNilai();
-    showToast('Penilaian tersimpan.');
+    try {
+        const tersimpan = await db.simpan('nilai', record);   // id dibuat oleh database
+        dataNilai.push(tersimpan);
+        renderPembelajaran();
+        closeModalNilai();
+        showToast('Penilaian tersimpan.');
+    } catch (err) {
+        showToast(err.message, 'error');
+    }
 }
 
 function confirmDeleteNilai(id) {
     if (guardKunci('Data nilai')) return;
-    showConfirmDialog('Hapus penilaian', 'Rekam nilai ini akan dihapus permanen.', () => {
-        dataNilai = dataNilai.filter(n => n.id !== id);
-        saveDataToStorage();
-        renderPembelajaran();
-        showToast('Penilaian dihapus.');
+    showConfirmDialog('Hapus penilaian', 'Rekam nilai ini akan dihapus permanen.', async () => {
+        try {
+            await db.hapus('nilai', { id });
+            dataNilai = dataNilai.filter(n => n.id !== id);
+            renderPembelajaran();
+            showToast('Penilaian dihapus.');
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
     }, 'Hapus');
 }
 
@@ -1863,31 +1940,42 @@ function renderStatusKunci() {
     renderPeriodeTag();
 }
 
-function savePengaturanNilai() {
-    pengaturan.tahun = $('setTahun').value.trim() || pengaturan.tahun;
-    pengaturan.semester = $('setSemester').value;
-    pengaturan.deadline = $('setDeadline').value;
-    pengaturan.bobotFormatif = parseInt($('setBobot').value, 10) || 40;
+async function savePengaturanNilai() {
+    const baru = {
+        id: 1,
+        tahun: $('setTahun').value.trim() || pengaturan.tahun,
+        semester: $('setSemester').value,
+        deadline: $('setDeadline').value || null,
+        bobotFormatif: parseInt($('setBobot').value, 10) || 40,
+        locked: pengaturan.locked,
+        lockedAt: pengaturan.lockedAt,
+        lockedBy: pengaturan.lockedBy
+    };
 
-    saveDataToStorage();
-    renderStatusKunci();
-    renderLeger();
-    renderNotifications();
-    showToast('Pengaturan periode tersimpan.');
+    try {
+        pengaturan = await db.simpan('pengaturan', baru);
+        renderStatusKunci();
+        renderLeger();
+        renderNotifications();
+        showToast('Pengaturan periode tersimpan.');
+    } catch (err) {
+        showToast(err.message, 'error');
+    }
 }
 
 function toggleKunciNilai() {
     if (nilaiTerkunci()) {
         showConfirmDialog('Buka kunci nilai',
             `Guru dapat kembali menambah dan mengubah nilai periode ${pengaturan.semester} ${pengaturan.tahun}.`,
-            () => {
-                pengaturan.locked = false;
-                pengaturan.lockedAt = null;
-                pengaturan.lockedBy = '';
-                saveDataToStorage();
-                renderStatusKunci();
-                renderNotifications();
-                showToast('Kunci dibuka. Nilai bisa diubah lagi.');
+            async () => {
+                try {
+                    pengaturan = await db.simpan('pengaturan', { id: 1, ...pengaturan, locked: false, lockedAt: null, lockedBy: '' });
+                    renderStatusKunci();
+                    renderNotifications();
+                    showToast('Kunci dibuka. Nilai bisa diubah lagi.');
+                } catch (err) {
+                    showToast(err.message, 'error');
+                }
             }, 'Buka kunci');
         return;
     }
@@ -1897,14 +1985,18 @@ function toggleKunciNilai() {
         ? `Masih ada ${belum} kombinasi murid–mapel tanpa nilai. Setelah dikunci, guru tidak bisa menambah atau menghapus nilai, sikap, P5, dan ekstrakurikuler.`
         : 'Setelah dikunci, guru tidak bisa menambah atau menghapus nilai, sikap, P5, dan ekstrakurikuler.';
 
-    showConfirmDialog(`Kunci nilai ${pengaturan.semester} ${pengaturan.tahun}`, catatan, () => {
-        pengaturan.locked = true;
-        pengaturan.lockedAt = new Date().toISOString();
-        pengaturan.lockedBy = currentUser.username;
-        saveDataToStorage();
-        renderStatusKunci();
-        renderNotifications();
-        showToast('Nilai dikunci.');
+    showConfirmDialog(`Kunci nilai ${pengaturan.semester} ${pengaturan.tahun}`, catatan, async () => {
+        try {
+            pengaturan = await db.simpan('pengaturan', {
+                id: 1, ...pengaturan,
+                locked: true, lockedAt: new Date().toISOString(), lockedBy: currentUser.username
+            });
+            renderStatusKunci();
+            renderNotifications();
+            showToast('Nilai dikunci.');
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
     }, 'Kunci sekarang');
 }
 
