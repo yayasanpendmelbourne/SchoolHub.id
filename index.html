@@ -1,457 +1,583 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduCore SMS - School Management System</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101a26">
+<title>EduCore — Portal Sekolah</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 </head>
 <body>
 
-    <!-- TOAST NOTIFICATION CONTAINER -->
-    <div id="toast" class="toast hidden"></div>
+<!-- Toast -->
+<div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
-    <!-- DIALOG CONFIRMATION MODAL -->
-    <div id="modalConfirm" class="modal-backdrop hidden">
-        <div class="modal-card confirm-dialog fade-in-up">
-            <div class="confirm-dialog-icon">⚠️</div>
-            <h2 id="confirmTitle">Konfirmasi</h2>
-            <p id="confirmMessage" class="text-muted mb-4">Apakah Anda yakin ingin melanjutkan tindakan ini?</p>
-            <div class="modal-actions" style="justify-content: center;">
-                <button type="button" class="btn btn-secondary" onclick="closeConfirmModal(false)">Batal</button>
-                <button type="button" class="btn btn-danger" onclick="closeConfirmModal(true)">Ya, Lanjutkan</button>
-            </div>
+<!-- Konfirmasi -->
+<div id="modalConfirm" class="modal-backdrop hidden" data-modal role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+  <div class="modal-card confirm-dialog">
+    <div class="confirm-dialog-icon" aria-hidden="true">⚠️</div>
+    <h2 id="confirmTitle">Konfirmasi</h2>
+    <p id="confirmMessage" class="modal-sub">Lanjutkan tindakan ini?</p>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-secondary" onclick="closeConfirmModal(false)">Batal</button>
+      <button type="button" class="btn btn-danger" id="confirmOkBtn" onclick="closeConfirmModal(true)">Ya, lanjutkan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= MASUK ======================= -->
+<div id="loginPage" class="auth-wrapper">
+  <section class="auth-aside">
+    <div class="auth-aside-head">
+      <img src="https://lh3.googleusercontent.com/d/1d01Ip9TgSPTBK3FjfvL4vxwJSS9ig3Wd" class="app-logo" alt="" onerror="this.style.display='none'">
+      <h2>EduCore</h2>
+    </div>
+
+    <div class="auth-pitch">
+      <h1>Satu portal untuk TK dan SD.</h1>
+      <p>Data murid, absensi harian, penilaian, dan kepegawaian dikelola di tempat yang sama — setiap guru hanya melihat jenjang yang ia ampu.</p>
+    </div>
+
+    <div class="auth-facts">
+      <div><strong>2</strong><span>Jenjang</span></div>
+      <div><strong>4</strong><span>Modul</span></div>
+      <div><strong>3</strong><span>Tingkat akses</span></div>
+    </div>
+  </section>
+
+  <section class="auth-panel">
+    <div class="auth-card">
+      <h2>Masuk ke portal</h2>
+      <p class="auth-subtitle">Gunakan akun yang diberikan administrator sekolah.</p>
+
+      <form id="formLogin" novalidate>
+        <div class="form-group">
+          <label for="loginUser">Nama pengguna</label>
+          <input type="text" id="loginUser" autocomplete="username" placeholder="mis. gurusd" required>
         </div>
-    </div>
 
-    <!-- HALAMAN LOGIN -->
-    <div id="loginPage" class="auth-wrapper">
-        <div class="auth-card fade-in-up">
-            <div class="brand-logo">
-                <img src="https://lh3.googleusercontent.com/d/1d01Ip9TgSPTBK3FjfvL4vxwJSS9ig3Wd" class="app-logo" alt="Logo">
-                <h2>EduCore <span>SMS</span></h2>
-            </div>
-            <p class="auth-subtitle">Sistem Informasi Management Portal</p>
-            
-            <form id="formLogin">
-                <div class="form-group">
-                    <label>Username / ID Staff</label>
-                    <input type="text" id="loginUser" placeholder="Masukkan username" required>
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="loginPass" placeholder="••••••••" required>
-                </div>
-                <div class="form-group">
-                    <label>Peran / Role Status</label>
-                    <select id="loginRole" required>
-                        <option value="admin">Admin / Staff Sekolah</option>
-                        <option value="guru_tk">Guru TK</option>
-                        <option value="guru_sd">Guru SD</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Masuk Ke Portal</button>
-            </form>
+        <div class="form-group">
+          <label for="loginPass">Kata sandi</label>
+          <div class="input-pass">
+            <input type="password" id="loginPass" autocomplete="current-password" placeholder="••••••••" required>
+            <button type="button" id="togglePass" aria-label="Tampilkan kata sandi">👁️</button>
+          </div>
+          <p class="field-hint">Peran Anda dikenali otomatis dari akun ini.</p>
         </div>
+
+        <button type="submit" class="btn btn-primary btn-lg btn-block">Masuk</button>
+      </form>
+
+      <div class="auth-hint">
+        <b>Akun demo</b>
+        <ul>
+          <li>Admin — <code>admin</code> / <code>admin123</code></li>
+          <li>Guru TK — <code>gurutk</code> / <code>tk123</code></li>
+          <li>Guru SD — <code>gurusd</code> / <code>sd123</code></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ======================= APLIKASI ======================= -->
+<div id="mainApp" class="wrapper hidden">
+
+  <div id="sidebarScrim" class="sidebar-scrim hidden" onclick="closeSidebar()"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <img src="https://lh3.googleusercontent.com/d/1d01Ip9TgSPTBK3FjfvL4vxwJSS9ig3Wd" class="app-logo small" alt="" onerror="this.style.display='none'">
+      <h2>EduCore</h2>
     </div>
 
-    <!-- MAIN APP WRAPPER -->
-    <div id="mainApp" class="wrapper hidden">
-        
-        <!-- SIDEBAR LAYOUT -->
-        <aside class="sidebar">
-            <div class="sidebar-brand">
-                <img src="https://lh3.googleusercontent.com/d/1d01Ip9TgSPTBK3FjfvL4vxwJSS9ig3Wd" class="app-logo small" alt="Logo">
-                <h2>EduCore</h2>
-            </div>
-
-            <div class="user-profile-card">
-                <img id="userAvatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" class="user-avatar" alt="Avatar">
-                <div class="user-meta">
-                    <h4 id="userNameDisplay">User Name</h4>
-                    <span id="userRoleBadge" class="badge-role">Role</span>
-                </div>
-            </div>
-
-            <nav class="sidebar-menu">
-                <ul>
-                    <li class="role-admin role-guru_tk role-guru_sd"><a href="#" class="nav-link active" onclick="switchTab('dashboard', event)">⚡ <span>Dashboard</span></a></li>
-                    
-                    <li class="menu-divider role-admin">MANAJEMEN HR & AKUN</li>
-                    <li class="role-admin"><a href="#" class="nav-link" onclick="switchTab('manajemen-hr', event)">👥 <span>Data Karyawan (HR)</span></a></li>
-                    <li class="role-admin"><a href="#" class="nav-link" onclick="switchTab('manajemen-user', event)">🔐 <span>Akses Pengguna</span></a></li>
-                    
-                    <li class="menu-divider role-guru_tk role-guru_sd">AKADEMIK & EVALUASI</li>
-                    <li class="role-guru_tk role-guru_sd"><a href="#" class="nav-link" onclick="switchTab('manajemen-pembelajaran', event)">📚 <span>Kelola Mapel & Nilai</span></a></li>
-
-                    <li class="menu-divider role-admin role-guru_tk">PESERTA DIDIK TK</li>
-                    <li class="role-admin role-guru_tk"><a href="#" class="nav-link" onclick="switchTab('siswa-tk', event)">👶 <span>Data Murid TK</span></a></li>
-                    
-                    <li class="menu-divider role-admin role-guru_sd">PESERTA DIDIK SD</li>
-                    <li class="role-admin role-guru_sd"><a href="#" class="nav-link" onclick="switchTab('siswa-sd', event)">🎒 <span>Data Murid SD</span></a></li>
-                    
-                    <li class="menu-divider role-admin role-guru_tk role-guru_sd">KEGIATAN HARIAN</li>
-                    <li class="role-admin role-guru_tk role-guru_sd"><a href="#" class="nav-link" onclick="switchTab('absensi', event)">📅 <span>Absensi Siswa</span></a></li>
-                    
-                    <li class="menu-divider role-admin">SPREADSHEET REKAP</li>
-                    <li class="role-admin"><a href="#" class="nav-link" onclick="switchTab('rekap-absensi-gas', event)">📊 <span>Google Sheets Sync</span></a></li>
-                </ul>
-            </nav>
-
-            <button class="btn btn-danger" style="width: 100%; justify-content: center;" onclick="handleLogout()">🚪 Logout</button>
-        </aside>
-
-        <!-- CONTENT AREA -->
-        <main class="content">
-            
-            <!-- HEADER NOTIFICATION -->
-            <div class="top-nav-bar">
-                <h1 id="pageMainHeading">Portal Administrasi</h1>
-                <div class="notif-dropdown-wrapper">
-                    <button class="btn-notif" onclick="toggleNotifDropdown()">
-                        🔔 <span class="notif-badge" id="notifCount">0</span>
-                    </button>
-                    <div id="notifDropdown" class="notif-card hidden">
-                        <div class="notif-header">
-                            <h4>Pemberitahuan</h4>
-                            <span class="badge-role" id="notifRoleTag">Role</span>
-                        </div>
-                        <div id="notifList" class="notif-body"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB: DASHBOARD -->
-            <div id="section-dashboard" class="tab-content fade-in-up">
-                <header class="welcome-banner">
-                    <h1 id="greetingTitle">Selamat Datang!</h1>
-                    <p id="realtimeClock" class="clock-subtitle">Memuat waktu...</p>
-                </header>
-
-                <div class="dashboard-grid-layout">
-                    <div>
-                        <div class="card p-4 style-schedule">
-                            <h4>Mata Pelajaran Aktif</h4>
-                            <div id="dashMapelList" class="mt-2"></div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="card-row">
-                            <div class="card stat-box blue-border">
-                                <small>Role Akses</small>
-                                <h3 id="dashRoleTitle" class="text-blue">-</h3>
-                            </div>
-                            <div class="card stat-box green-border">
-                                <small>Total Mapel</small>
-                                <h1 class="text-blue" id="dashTotalMapel">0</h1>
-                            </div>
-                            <div class="card stat-box green-light-border">
-                                <small>Evaluasi Nilai</small>
-                                <h1 class="text-green" id="dashTotalNilai">0</h1>
-                            </div>
-                        </div>
-
-                        <div id="attendanceTrendCard" class="card p-4 mt-4">
-                            <h4>📈 Kehadiran Siswa Bulan Ini</h4>
-                            <div style="position: relative; height: 200px; margin-top: 12px;">
-                                <canvas id="attendanceChart"></canvas>
-                            </div>
-                        </div>
-
-                        <div class="card p-4 mt-4">
-                            <h4>Evaluasi Siswa Terbaru</h4>
-                            <div class="table-responsive mt-2">
-                                <table>
-                                    <thead>
-                                        <tr><th>Siswa</th><th>Mata Pelajaran</th><th>Capaian</th><th>Catatan Guru</th></tr>
-                                    </thead>
-                                    <tbody id="dashTbodyNilai"></tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB: MANAJEMEN HR -->
-            <div id="section-manajemen-hr" class="tab-content hidden fade-in-up">
-                <div class="top-nav-bar" style="margin-bottom: 16px;">
-                    <div>
-                        <h2>Manajemen Karyawan (HR)</h2>
-                        <p class="text-muted" style="font-size:0.875rem;">Kelola data guru, administrasi, dan penggajian.</p>
-                    </div>
-                    <div style="display:flex; gap: 12px;">
-                        <input type="text" style="padding: 10px 14px; border: 1px solid var(--border-color); border-radius: var(--radius-sm);" placeholder="🔍 Cari nama/NIP..." onkeyup="filterEmployeeTable(this.value)">
-                        <button class="btn btn-primary" onclick="openModalHR()">+ Tambah Karyawan</button>
-                    </div>
-                </div>
-
-                <div class="card table-card">
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr><th>NIP</th><th>Nama Lengkap</th><th>Jabatan</th><th>Status</th><th>Gaji Pokok</th><th>Kontak</th><th>Aksi</th></tr>
-                            </thead>
-                            <tbody id="tbodyHR"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB: REKAP SPREADSHEET -->
-            <div id="section-rekap-absensi-gas" class="tab-content hidden fade-in-up">
-                <div class="top-nav-bar" style="margin-bottom: 16px;">
-                    <div>
-                        <h2>Rekapitulasi Google Sheets</h2>
-                        <p class="text-muted" style="font-size:0.875rem;">Data disinkronkan langsung dari spreadsheet Google Apps Script.</p>
-                    </div>
-                    <button class="btn btn-primary" onclick="fetchGoogleSheetAttendance()">🔄 Sinkronkan Data</button>
-                </div>
-
-                <div class="card table-card">
-                    <div id="loadingSheet" class="hidden loading-container">
-                        <div class="loading-spinner"></div>
-                        <p>Memuat data spreadsheet...</p>
-                    </div>
-                    <div class="table-responsive">
-                        <table>
-                            <thead id="theadGAS"></thead>
-                            <tbody id="tbodyGAS"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB: MAPEL & NILAI -->
-            <div id="section-manajemen-pembelajaran" class="tab-content hidden fade-in-up">
-                <div class="top-nav-bar" style="margin-bottom: 16px;">
-                    <h2>Kurikulum & Penilaian</h2>
-                    <div style="display:flex; gap: 10px;">
-                        <button class="btn btn-secondary" onclick="openModalMapel()">+ Mapel Baru</button>
-                        <button class="btn btn-primary" onclick="openModalNilai()">+ Input Nilai</button>
-                    </div>
-                </div>
-
-                <div class="grid-2-col">
-                    <div class="card p-4">
-                        <h3 class="mb-2">Daftar Mata Pelajaran</h3>
-                        <div class="table-responsive">
-                            <table>
-                                <thead><tr><th>Kode</th><th>Nama Mapel</th><th>Pengampu</th></tr></thead>
-                                <tbody id="tbodyMapel"></tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="card p-4">
-                        <h3 class="mb-2">Rekam Evaluasi Nilai</h3>
-                        <div class="table-responsive">
-                            <table>
-                                <thead><tr><th>Siswa</th><th>Mapel</th><th>Nilai</th><th>Aksi</th></tr></thead>
-                                <tbody id="tbodyNilai"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB: USER PORTAL -->
-            <div id="section-manajemen-user" class="tab-content hidden fade-in-up">
-                <div class="top-nav-bar" style="margin-bottom: 16px;">
-                    <h2>Akses Pengguna Portal</h2>
-                    <button class="btn btn-primary" onclick="openModalUser()">+ Tambah Akun</button>
-                </div>
-                <div class="card table-card">
-                    <table>
-                        <thead><tr><th>Username</th><th>Nama</th><th>Role</th><th>Aksi</th></tr></thead>
-                        <tbody id="tbodyUsers"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- TAB: MURID TK -->
-            <div id="section-siswa-tk" class="tab-content hidden fade-in-up">
-                <div class="top-nav-bar" style="margin-bottom: 16px;">
-                    <h2>Data Peserta Didik TK</h2>
-                    <button class="btn btn-primary" onclick="openModalSiswa('TK')">+ Tambah Murid TK</button>
-                </div>
-                <div class="card table-card">
-                    <table>
-                        <thead><tr><th>NIS</th><th>Nama Siswa</th><th>Kelompok</th><th>Orang Tua</th><th>HP</th><th>Aksi</th></tr></thead>
-                        <tbody id="tbodySiswaTK"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- TAB: MURID SD -->
-            <div id="section-siswa-sd" class="tab-content hidden fade-in-up">
-                <div class="top-nav-bar" style="margin-bottom: 16px;">
-                    <h2>Data Peserta Didik SD</h2>
-                    <button class="btn btn-primary" onclick="openModalSiswa('SD')">+ Tambah Murid SD</button>
-                </div>
-                <div class="card table-card">
-                    <table>
-                        <thead><tr><th>NISN</th><th>Nama Siswa</th><th>Kelas</th><th>Orang Tua</th><th>HP</th><th>Aksi</th></tr></thead>
-                        <tbody id="tbodySiswaSD"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- TAB: ABSENSI HARIAN -->
-            <div id="section-absensi" class="tab-content hidden fade-in-up">
-                <div class="top-nav-bar" style="margin-bottom: 16px;">
-                    <h2>Absensi Kehadiran Siswa</h2>
-                    <input type="date" id="filterTanggalAbsensi" onchange="renderAbsensi()" style="padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-                </div>
-                <div class="card table-card">
-                    <table>
-                        <thead><tr><th>NIS</th><th>Nama Siswa</th><th>Tingkat</th><th>Kelas</th><th>Status Kehadiran</th></tr></thead>
-                        <tbody id="tbodyAbsensi"></tbody>
-                    </table>
-                </div>
-            </div>
-
-        </main>
+    <div class="user-profile-card">
+      <img id="userAvatar" src="" class="user-avatar" alt="">
+      <div class="user-meta">
+        <h4 id="userNameDisplay">—</h4>
+        <span id="userRoleBadge" class="badge-role">—</span>
+      </div>
     </div>
 
-    <!-- MODAL PROFILE SISWA -->
-    <div id="modalStudentProfile" class="modal-backdrop hidden">
-        <div class="modal-card fade-in-up" style="max-width: 600px;">
-            <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 20px;">
-                <img id="profileAvatar" src="" class="user-avatar" style="width: 64px; height: 64px;" alt="Avatar">
-                <div>
-                    <h2 id="profileNama" style="margin: 0;">Nama Murid</h2>
-                    <p class="text-muted"><span id="profileTingkatKelas">TK B</span> • NIS: <span id="profileNis">101</span></p>
-                </div>
+    <nav class="sidebar-menu" aria-label="Menu utama">
+      <ul>
+        <li data-roles="admin,guru_tk,guru_sd">
+          <a href="#" class="nav-link" data-tab="dashboard" onclick="switchTab('dashboard', event)">
+            <span class="nav-ico" aria-hidden="true">◈</span><span>Ringkasan</span>
+          </a>
+        </li>
+
+        <li class="menu-divider" data-roles="admin">Kepegawaian</li>
+        <li data-roles="admin">
+          <a href="#" class="nav-link" data-tab="manajemen-hr" onclick="switchTab('manajemen-hr', event)">
+            <span class="nav-ico" aria-hidden="true">👥</span><span>Data karyawan</span>
+          </a>
+        </li>
+        <li data-roles="admin">
+          <a href="#" class="nav-link" data-tab="manajemen-user" onclick="switchTab('manajemen-user', event)">
+            <span class="nav-ico" aria-hidden="true">🔐</span><span>Akun pengguna</span>
+          </a>
+        </li>
+
+        <li class="menu-divider" data-roles="admin,guru_tk,guru_sd">Akademik</li>
+        <li data-roles="admin,guru_tk,guru_sd">
+          <a href="#" class="nav-link" data-tab="manajemen-pembelajaran" onclick="switchTab('manajemen-pembelajaran', event)">
+            <span class="nav-ico" aria-hidden="true">📚</span><span>Mapel &amp; nilai</span>
+          </a>
+        </li>
+
+        <li class="menu-divider" data-roles="admin,guru_tk">Peserta didik TK</li>
+        <li data-roles="admin,guru_tk">
+          <a href="#" class="nav-link" data-tab="siswa-tk" onclick="switchTab('siswa-tk', event)">
+            <span class="nav-ico" aria-hidden="true">🧸</span><span>Murid TK</span>
+          </a>
+        </li>
+
+        <li class="menu-divider" data-roles="admin,guru_sd">Peserta didik SD</li>
+        <li data-roles="admin,guru_sd">
+          <a href="#" class="nav-link" data-tab="siswa-sd" onclick="switchTab('siswa-sd', event)">
+            <span class="nav-ico" aria-hidden="true">🎒</span><span>Murid SD</span>
+          </a>
+        </li>
+
+        <li class="menu-divider" data-roles="admin,guru_tk,guru_sd">Harian</li>
+        <li data-roles="admin,guru_tk,guru_sd">
+          <a href="#" class="nav-link" data-tab="absensi" onclick="switchTab('absensi', event)">
+            <span class="nav-ico" aria-hidden="true">📅</span><span>Absensi</span>
+          </a>
+        </li>
+
+        <li class="menu-divider" data-roles="admin">Integrasi</li>
+        <li data-roles="admin">
+          <a href="#" class="nav-link" data-tab="rekap-absensi-gas" onclick="switchTab('rekap-absensi-gas', event)">
+            <span class="nav-ico" aria-hidden="true">📊</span><span>Google Sheets</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-foot">
+      <button class="btn btn-logout" onclick="handleLogout()">Keluar</button>
+    </div>
+  </aside>
+
+  <main class="content">
+
+    <div class="top-nav-bar">
+      <div class="top-nav-left">
+        <button class="btn-burger" onclick="openSidebar()" aria-label="Buka menu">☰</button>
+        <h1 id="pageMainHeading">Ringkasan</h1>
+      </div>
+
+      <div class="top-nav-right">
+        <div class="notif-dropdown-wrapper" id="notifWrapper">
+          <button class="btn-notif" onclick="toggleNotifDropdown(event)" aria-label="Pemberitahuan" aria-expanded="false" id="notifBtn">
+            🔔<span class="notif-badge hidden" id="notifCount">0</span>
+          </button>
+          <div id="notifDropdown" class="notif-card hidden">
+            <div class="notif-header">
+              <h4>Pemberitahuan</h4>
+              <span class="badge-role" id="notifRoleTag">—</span>
             </div>
-            <div class="grid-2-col mb-4">
-                <div><p><strong>Orang Tua:</strong> <span id="profileOrtu">-</span></p></div>
-                <div><p><strong>Kontak HP:</strong> <span id="profileHp">-</span></p></div>
-            </div>
-            <h4>Riwayat Penilaian</h4>
-            <div class="table-responsive mt-2">
-                <table>
-                    <thead><tr><th>Mata Pelajaran</th><th>Nilai</th><th>Catatan</th></tr></thead>
-                    <tbody id="profileTbodyNilai"></tbody>
-                </table>
-            </div>
-            <div class="modal-actions">
-                <button type="button" class="btn btn-secondary" onclick="closeModalStudentProfile()">Tutup</button>
-            </div>
+            <div id="notifList" class="notif-body"></div>
+          </div>
         </div>
+      </div>
     </div>
 
-    <!-- MODAL TAMBAH HR -->
-    <div id="modalHR" class="modal-backdrop hidden">
-        <div class="modal-card fade-in-up">
-            <h2>Tambah Karyawan (HR)</h2>
-            <form id="formHR" onsubmit="saveEmployee(event)">
-                <div class="form-group"><label>NIP</label><input type="text" id="hrNip" placeholder="KAY-2026-001" required></div>
-                <div class="form-group"><label>Nama Lengkap</label><input type="text" id="hrNama" required></div>
-                <div class="form-group">
-                    <label>Departemen</label>
-                    <select id="hrDept" required>
-                        <option value="Guru SD">Pengajar SD</option>
-                        <option value="Guru TK">Pengajar TK</option>
-                        <option value="Administrasi">Staff Administrasi</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Status</label>
-                    <select id="hrStatus" required>
-                        <option value="Tetap">Tetap</option>
-                        <option value="Kontrak">Kontrak</option>
-                    </select>
-                </div>
-                <div class="form-group"><label>Gaji Pokok (Rp)</label><input type="number" id="hrGaji" required></div>
-                <div class="form-group"><label>No. HP</label><input type="text" id="hrHp" required></div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModalHR()">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </form>
+    <!-- RINGKASAN -->
+    <div id="section-dashboard" class="tab-content">
+      <div class="greeting">
+        <h1 id="greetingTitle">Selamat datang</h1>
+        <p id="realtimeClock" class="clock-subtitle">Memuat waktu…</p>
+      </div>
+
+      <div class="stat-strip">
+        <div class="stat-box stat-accent-a">
+          <small>Peran akses</small>
+          <span class="stat-value is-text" id="dashRoleTitle">—</span>
         </div>
-    </div>
-
-    <!-- MODAL MAPEL -->
-    <div id="modalMapel" class="modal-backdrop hidden">
-        <div class="modal-card fade-in-up">
-            <h2>Tambah Mata Pelajaran</h2>
-            <form id="formMapel" onsubmit="saveMapel(event)">
-                <div class="form-group"><label>Kode Mapel</label><input type="text" id="mapelKode" placeholder="SD-BIO" required></div>
-                <div class="form-group"><label>Nama Mapel</label><input type="text" id="mapelNama" placeholder="Biologi Dasar" required></div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModalMapel()">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </form>
+        <div class="stat-box stat-accent-b">
+          <small id="dashLabelSiswa">Murid dalam tanggung jawab</small>
+          <span class="stat-value" id="dashTotalSiswa">0</span>
         </div>
-    </div>
-
-    <!-- MODAL NILAI -->
-    <div id="modalNilai" class="modal-backdrop hidden">
-        <div class="modal-card fade-in-up">
-            <h2>Input Penilaian Siswa</h2>
-            <form id="formNilai" onsubmit="saveNilai(event)">
-                <div class="form-group"><label>Siswa</label><select id="nilaiSiswaSelect" required></select></div>
-                <div class="form-group"><label>Mapel</label><select id="nilaiMapelSelect" required></select></div>
-                <div class="form-group"><label>Nilai / Capaian</label><input type="text" id="nilaiAngka" placeholder="85 atau BSB" required></div>
-                <div class="form-group"><label>Catatan</label><input type="text" id="nilaiCatatan" placeholder="Progres baik" required></div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModalNilai()">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </form>
+        <div class="stat-box stat-accent-c">
+          <small>Hadir hari ini</small>
+          <span class="stat-value" id="dashHadirHariIni">0%</span>
         </div>
-    </div>
+      </div>
 
-    <!-- MODAL USER -->
-    <div id="modalUser" class="modal-backdrop hidden">
-        <div class="modal-card fade-in-up">
-            <h2>Tambah Pengguna Akses</h2>
-            <form id="formUser" onsubmit="saveUser(event)">
-                <div class="form-group"><label>Username</label><input type="text" id="userInputUsername" required></div>
-                <div class="form-group"><label>Password</label><input type="password" id="userInputPassword" required></div>
-                <div class="form-group"><label>Nama Lengkap</label><input type="text" id="userInputNama" required></div>
-                <div class="form-group">
-                    <label>Role</label>
-                    <select id="userInputRole" required>
-                        <option value="admin">Admin</option>
-                        <option value="guru_tk">Guru TK</option>
-                        <option value="guru_sd">Guru SD</option>
-                    </select>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModalUser()">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </form>
+      <div class="dashboard-grid-layout">
+        <div class="card p-4">
+          <h3>Mata pelajaran aktif</h3>
+          <p class="text-muted" style="font-size:.8125rem;">Yang tercatat untuk peran Anda.</p>
+          <div id="dashMapelList" class="mt-2"></div>
         </div>
-    </div>
 
-    <!-- MODAL SISWA -->
-    <div id="modalSiswa" class="modal-backdrop hidden">
-        <div class="modal-card fade-in-up">
-            <h2 id="modalSiswaTitle">Tambah Murid Baru</h2>
-            <form id="formSiswa" onsubmit="saveSiswa(event)">
-                <input type="hidden" id="siswaTingkat">
-                <div class="form-group"><label>NIS / NISN</label><input type="text" id="siswaNis" required></div>
-                <div class="form-group"><label>Nama Lengkap</label><input type="text" id="siswaNama" required></div>
-                <div class="form-group"><label>Kelas / Kelompok</label><input type="text" id="siswaKelas" placeholder="SD Kelas 1 / TK B" required></div>
-                <div class="form-group"><label>Nama Orang Tua</label><input type="text" id="siswaOrtu" required></div>
-                <div class="form-group"><label>No. HP Wali</label><input type="text" id="siswaHp" required></div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModalSiswa()">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </form>
+        <div>
+          <div id="attendanceTrendCard" class="card p-4">
+            <div class="card-title">
+              <h3>Kehadiran 7 hari terakhir</h3>
+              <span class="badge-role tag-accent" id="chartScopeTag">—</span>
+            </div>
+            <div style="position:relative;height:210px;margin-top:14px;">
+              <canvas id="attendanceChart"></canvas>
+            </div>
+          </div>
+
+          <div class="card mt-4">
+            <div class="p-4" style="padding-bottom:8px;">
+              <h3>Penilaian terbaru</h3>
+            </div>
+            <div class="table-responsive">
+              <table>
+                <thead><tr><th>Murid</th><th>Mata pelajaran</th><th>Capaian</th><th>Catatan</th></tr></thead>
+                <tbody id="dashTbodyNilai"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- KEPEGAWAIAN -->
+    <div id="section-manajemen-hr" class="tab-content hidden">
+      <div class="page-head">
+        <div>
+          <h2>Data karyawan</h2>
+          <p>Guru, staf administrasi, dan informasi penggajian.</p>
+        </div>
+        <div class="page-head-actions">
+          <input type="text" class="search-input" placeholder="Cari nama, NIP, atau unit" oninput="filterEmployeeTable(this.value)">
+          <button class="btn btn-primary" onclick="openModalHR()">Tambah karyawan</button>
+        </div>
+      </div>
+
+      <div class="card table-card">
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr><th>NIP</th><th>Nama</th><th>Unit</th><th>Status</th><th>Gaji pokok</th><th>Kontak</th><th></th></tr>
+            </thead>
+            <tbody id="tbodyHR"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- AKUN -->
+    <div id="section-manajemen-user" class="tab-content hidden">
+      <div class="page-head">
+        <div>
+          <h2>Akun pengguna</h2>
+          <p>Siapa saja yang dapat masuk ke portal dan sebagai peran apa.</p>
+        </div>
+        <div class="page-head-actions">
+          <button class="btn btn-primary" onclick="openModalUser()">Tambah akun</button>
+        </div>
+      </div>
+      <div class="card table-card">
+        <div class="table-responsive">
+          <table>
+            <thead><tr><th>Nama pengguna</th><th>Nama lengkap</th><th>Peran</th><th></th></tr></thead>
+            <tbody id="tbodyUsers"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- AKADEMIK -->
+    <div id="section-manajemen-pembelajaran" class="tab-content hidden">
+      <div class="page-head">
+        <div>
+          <h2>Mata pelajaran &amp; nilai</h2>
+          <p id="pembelajaranScope">Kurikulum dan rekam penilaian.</p>
+        </div>
+        <div class="page-head-actions">
+          <button class="btn btn-secondary" onclick="openModalMapel()">Tambah mapel</button>
+          <button class="btn btn-primary" onclick="openModalNilai()">Input nilai</button>
+        </div>
+      </div>
+
+      <div class="grid-2-col">
+        <div class="card table-card">
+          <div class="p-4" style="padding-bottom:8px;"><h3>Mata pelajaran</h3></div>
+          <div class="table-responsive">
+            <table>
+              <thead><tr><th>Kode</th><th>Nama</th><th>Jenjang</th><th></th></tr></thead>
+              <tbody id="tbodyMapel"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card table-card">
+          <div class="p-4" style="padding-bottom:8px;"><h3>Rekam penilaian</h3></div>
+          <div class="table-responsive">
+            <table>
+              <thead><tr><th>Murid</th><th>Mapel</th><th>Capaian</th><th></th></tr></thead>
+              <tbody id="tbodyNilai"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MURID TK -->
+    <div id="section-siswa-tk" class="tab-content hidden">
+      <div class="page-head">
+        <div>
+          <h2>Murid TK</h2>
+          <p>Kelompok A dan B beserta data wali.</p>
+        </div>
+        <div class="page-head-actions">
+          <input type="text" class="search-input" placeholder="Cari nama atau NIS" oninput="filterSiswaTable('TK', this.value)">
+          <button class="btn btn-primary" onclick="openModalSiswa('TK')">Tambah murid</button>
+        </div>
+      </div>
+      <div class="card table-card">
+        <div class="table-responsive">
+          <table>
+            <thead><tr><th>NIS</th><th>Nama</th><th>Kelompok</th><th>Orang tua</th><th>Kontak</th><th></th></tr></thead>
+            <tbody id="tbodySiswaTK"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- MURID SD -->
+    <div id="section-siswa-sd" class="tab-content hidden">
+      <div class="page-head">
+        <div>
+          <h2>Murid SD</h2>
+          <p>Kelas 1 sampai 6 beserta data wali.</p>
+        </div>
+        <div class="page-head-actions">
+          <input type="text" class="search-input" placeholder="Cari nama atau NISN" oninput="filterSiswaTable('SD', this.value)">
+          <button class="btn btn-primary" onclick="openModalSiswa('SD')">Tambah murid</button>
+        </div>
+      </div>
+      <div class="card table-card">
+        <div class="table-responsive">
+          <table>
+            <thead><tr><th>NISN</th><th>Nama</th><th>Kelas</th><th>Orang tua</th><th>Kontak</th><th></th></tr></thead>
+            <tbody id="tbodySiswaSD"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABSENSI -->
+    <div id="section-absensi" class="tab-content hidden">
+      <div class="page-head">
+        <div>
+          <h2>Absensi harian</h2>
+          <p id="absensiScope">Perubahan tersimpan otomatis.</p>
+        </div>
+        <div class="page-head-actions">
+          <button class="btn btn-secondary" onclick="markAllPresent()">Tandai semua hadir</button>
+          <input type="date" id="filterTanggalAbsensi" class="input" style="width:auto;" onchange="renderAbsensi()">
+        </div>
+      </div>
+      <div class="card table-card">
+        <div class="table-responsive">
+          <table>
+            <thead><tr><th>NIS</th><th>Nama</th><th>Jenjang</th><th>Kelas</th><th>Kehadiran</th></tr></thead>
+            <tbody id="tbodyAbsensi"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- GOOGLE SHEETS -->
+    <div id="section-rekap-absensi-gas" class="tab-content hidden">
+      <div class="page-head">
+        <div>
+          <h2>Rekap Google Sheets</h2>
+          <p>Ditarik langsung dari spreadsheet yang dipublikasikan sekolah.</p>
+        </div>
+        <div class="page-head-actions">
+          <button class="btn btn-primary" id="btnSyncSheet" onclick="fetchGoogleSheetAttendance()">Tarik data</button>
+        </div>
+      </div>
+
+      <div class="card table-card">
+        <div id="loadingSheet" class="hidden loading-container">
+          <div class="loading-spinner"></div>
+          <p>Mengambil data spreadsheet…</p>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead id="theadGAS"></thead>
+            <tbody id="tbodyGAS"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ======================= MODAL ======================= -->
+
+<div id="modalStudentProfile" class="modal-backdrop hidden" data-modal role="dialog" aria-modal="true">
+  <div class="modal-card" style="max-width:580px;">
+    <div class="profile-head">
+      <img id="profileAvatar" src="" class="user-avatar" alt="">
+      <div>
+        <h2 id="profileNama">—</h2>
+        <div class="profile-meta">
+          <span class="badge-role" id="profileTingkatKelas">—</span>
+          <span>NIS <span id="profileNis" class="num">—</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2-col mb-4" style="gap:12px;">
+      <div class="info-pair"><span>Orang tua</span><strong id="profileOrtu">—</strong></div>
+      <div class="info-pair"><span>Kontak</span><strong id="profileHp">—</strong></div>
+    </div>
+
+    <h4 class="mb-2">Riwayat penilaian</h4>
+    <div class="table-responsive card table-card">
+      <table>
+        <thead><tr><th>Mata pelajaran</th><th>Capaian</th><th>Catatan</th></tr></thead>
+        <tbody id="profileTbodyNilai"></tbody>
+      </table>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn btn-secondary" onclick="closeModalStudentProfile()">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<div id="modalHR" class="modal-backdrop hidden" data-modal role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <h2>Tambah karyawan</h2>
+    <p class="modal-sub">NIP harus unik dan tidak bisa diubah setelah disimpan.</p>
+    <form id="formHR" onsubmit="saveEmployee(event)">
+      <div class="grid-2-col" style="gap:0 16px;">
+        <div class="form-group"><label for="hrNip">NIP</label><input type="text" id="hrNip" placeholder="KAY-2026-004" required></div>
+        <div class="form-group"><label for="hrNama">Nama lengkap</label><input type="text" id="hrNama" required></div>
+      </div>
+      <div class="grid-2-col" style="gap:0 16px;">
+        <div class="form-group">
+          <label for="hrDept">Unit</label>
+          <select id="hrDept" required>
+            <option value="Guru SD">Guru SD</option>
+            <option value="Guru TK">Guru TK</option>
+            <option value="Administrasi">Administrasi</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="hrStatus">Status</label>
+          <select id="hrStatus" required>
+            <option value="Tetap">Tetap</option>
+            <option value="Kontrak">Kontrak</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid-2-col" style="gap:0 16px;">
+        <div class="form-group"><label for="hrGaji">Gaji pokok (Rp)</label><input type="number" id="hrGaji" min="0" step="50000" required></div>
+        <div class="form-group"><label for="hrHp">Nomor HP</label><input type="tel" id="hrHp" placeholder="0812…" required></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModalHR()">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan karyawan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modalMapel" class="modal-backdrop hidden" data-modal role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <h2>Tambah mata pelajaran</h2>
+    <p class="modal-sub">Kode dipakai sebagai penanda singkat di jadwal dan penilaian.</p>
+    <form id="formMapel" onsubmit="saveMapel(event)">
+      <div class="form-group"><label for="mapelKode">Kode</label><input type="text" id="mapelKode" placeholder="SD-IPA" required></div>
+      <div class="form-group"><label for="mapelNama">Nama mata pelajaran</label><input type="text" id="mapelNama" placeholder="IPAS Integrasi" required></div>
+      <div class="form-group" id="mapelJenjangGroup">
+        <label for="mapelRole">Jenjang</label>
+        <select id="mapelRole" required>
+          <option value="guru_tk">TK</option>
+          <option value="guru_sd">SD</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModalMapel()">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan mapel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modalNilai" class="modal-backdrop hidden" data-modal role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <h2>Input penilaian</h2>
+    <p class="modal-sub">Pilih mata pelajaran dulu — daftar murid menyesuaikan jenjangnya.</p>
+    <form id="formNilai" onsubmit="saveNilai(event)">
+      <div class="form-group"><label for="nilaiMapelSelect">Mata pelajaran</label><select id="nilaiMapelSelect" required onchange="syncNilaiSiswaOptions()"></select></div>
+      <div class="form-group"><label for="nilaiSiswaSelect">Murid</label><select id="nilaiSiswaSelect" required></select></div>
+      <div class="form-group"><label for="nilaiAngka">Capaian</label><input type="text" id="nilaiAngka" placeholder="85 atau BSB" required></div>
+      <div class="form-group"><label for="nilaiCatatan">Catatan</label><input type="text" id="nilaiCatatan" placeholder="Perkembangan sudah sesuai target" required></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModalNilai()">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan nilai</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modalUser" class="modal-backdrop hidden" data-modal role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <h2>Tambah akun</h2>
+    <p class="modal-sub">Peran menentukan menu apa saja yang terlihat setelah masuk.</p>
+    <form id="formUser" onsubmit="saveUser(event)">
+      <div class="form-group"><label for="userInputUsername">Nama pengguna</label><input type="text" id="userInputUsername" autocomplete="off" required></div>
+      <div class="form-group"><label for="userInputPassword">Kata sandi</label><input type="password" id="userInputPassword" autocomplete="new-password" minlength="5" required><p class="field-hint">Minimal 5 karakter.</p></div>
+      <div class="form-group"><label for="userInputNama">Nama lengkap</label><input type="text" id="userInputNama" required></div>
+      <div class="form-group">
+        <label for="userInputRole">Peran</label>
+        <select id="userInputRole" required>
+          <option value="admin">Admin</option>
+          <option value="guru_tk">Guru TK</option>
+          <option value="guru_sd">Guru SD</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModalUser()">Batal</button>
+        <button type="submit" class="btn btn-primary">Buat akun</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modalSiswa" class="modal-backdrop hidden" data-modal role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <h2 id="modalSiswaTitle">Tambah murid</h2>
+    <p class="modal-sub" id="modalSiswaSub">Nomor induk harus unik.</p>
+    <form id="formSiswa" onsubmit="saveSiswa(event)">
+      <input type="hidden" id="siswaTingkat">
+      <div class="grid-2-col" style="gap:0 16px;">
+        <div class="form-group"><label for="siswaNis">Nomor induk</label><input type="text" id="siswaNis" required></div>
+        <div class="form-group"><label for="siswaKelas">Kelas / kelompok</label><input type="text" id="siswaKelas" required></div>
+      </div>
+      <div class="form-group"><label for="siswaNama">Nama lengkap</label><input type="text" id="siswaNama" required></div>
+      <div class="grid-2-col" style="gap:0 16px;">
+        <div class="form-group"><label for="siswaOrtu">Nama orang tua</label><input type="text" id="siswaOrtu" required></div>
+        <div class="form-group"><label for="siswaHp">Kontak wali</label><input type="tel" id="siswaHp" placeholder="0812…" required></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModalSiswa()">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan murid</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
